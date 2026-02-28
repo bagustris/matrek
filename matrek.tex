@@ -1,0 +1,58 @@
+\documentclass[12pt]{book}
+\include{preamble}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\theoremstyle{plain}
+\newtheorem{thm}{Theorem}[chapter]
+\theoremstyle{definition}
+\newtheorem{answ}[thm]{Jawaban}
+\newtheorem{exmp}[thm]{Contoh}
+%\usepackage[bahasa]{babel}
+\captionsetup[table]{name = Tabel}
+\usepackage{color}
+\definecolor{gray75}{gray}{0.6}
+\newcommand{\hsp}{\hspace{5pt}}
+%%\titleformat{\chapter}[hang]{\Huge\bfseries}{\thechapter\hsp\textcolor{gray75}{|}\hsp}{0pt}{\Huge\bfseries}
+%%Options: Sonny, Lenny, Glenn, Conny, Rejne, Bjarne, Bjornstrup
+\usepackage[Lenny]{fncychap}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[LE]{\leftmark}
+\fancyhead[RO]{\nouppercase{\rightmark}}
+\fancyfoot[LE,RO]{\thepage}
+%===============================================================
+\begin{document}
+\begin{titlepage}
+Modul Belajar\\
+\textsc{\Huge Dasar Matematika Rekayasa}\\[13cm]
+Penyusun:\\
+Bagus Tris Atmaja \\
+Dwi Prananto \\
+Mifta Nur Farid\\
+
+{\large
+Institut Teknologi Sepuluh Nopember\\
+    2017\\}
+\end{titlepage}
+\tableofcontents{}\listoffigures
+%==============================================================
+
+\input{pengantar}
+
+\input{bab1}
+
+\input{bab2}
+
+\input{bab3}
+
+\input{bab4}
+
+\input{bab5}
+
+\input{bab6}
+
+\input{bab7}
+
+%==============================================================
+\end{document}

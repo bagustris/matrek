@@ -1,0 +1,217 @@
+\chapter{Deret Fourier Fungsi Periodik}
+
+\section*{Pengantar}
+Fungsi periodik banyak ditemui dalam berbagai masalah teknik. Fungsi tersebut biasanya lebih rumit daripada fungsi sinus dan kosinus. Deret Fourier merupakan upaya untuk menyatakan sembarang fungsi periodik kedalam fungsi sinus dan kosinus.
+
+Suatu fungsi dinyatakan periodik jika fungsi tersebut terdefinisikan untuk semua $t$ real dan jika terdapat bilangan positif $T$ sedemikian hingga
+
+\begin{equation}
+\label{sec:periodik}
+f(t+T)=f(t),  
+\end{equation}
+untuk semua $t$.
+
+Bilangan $T$ disebut periode dari fungsi $f(t)$. Menurut persamaan~\ref{sec:periodik} jika $T$ adalah periode dasar, maka \textit{frekuensi sudut dasar} (atau \textit{frekuensi angular}) didefinisikan sebagai
+\begin{equation}
+\omega_0 = \frac{2\pi}{T}.
+\end{equation}
+
+\section{Deret Fourier Trigonometri}
+
+Gagasan utama Deret Fourier adalah bahwa fungsi periodik yang cukup "mulus" dapat dinyatakan sebagai superposisi (jumlah tak berhingga) dari fungsi sinus dan kosinus dengan frekuensi kelipatan bulat dari frekuensi dasar $\omega_0$.
+
+Jika $f(t)$ adalah fungsi periodik dengan periode $T$, maka \textbf{deret Fourier} dari $f(t)$ adalah
+\begin{equation}
+f(t) = \frac{a_0}{2} + \sum_{n=1}^{\infty}\Bigl[a_n \cos(n\omega_0 t) + b_n \sin(n\omega_0 t)\Bigr],
+\label{eq:deret-fourier}
+\end{equation}
+dengan $\omega_0 = 2\pi/T$.
+
+\subsection{Koefisien Fourier}
+
+Koefisien-koefisien $a_n$ dan $b_n$ pada persamaan~\ref{eq:deret-fourier} disebut \textbf{koefisien Fourier} dan diperoleh dari
+\begin{equation}
+a_0 = \frac{2}{T}\int_{-T/2}^{T/2} f(t)\,dt,
+\label{eq:a0}
+\end{equation}
+\begin{equation}
+a_n = \frac{2}{T}\int_{-T/2}^{T/2} f(t)\cos(n\omega_0 t)\,dt, \quad n = 1,2,3,\ldots
+\label{eq:an}
+\end{equation}
+\begin{equation}
+b_n = \frac{2}{T}\int_{-T/2}^{T/2} f(t)\sin(n\omega_0 t)\,dt, \quad n = 1,2,3,\ldots
+\label{eq:bn}
+\end{equation}
+
+Koefisien $a_0/2$ adalah nilai rata-rata (komponen DC) dari $f(t)$, sedangkan $a_n$ dan $b_n$ menggambarkan amplitudo komponen kosinus dan sinus pada harmonik ke-$n$.
+
+Perlu diperhatikan bahwa integral pada persamaan~\ref{eq:a0}--\ref{eq:bn} dapat diambil pada sembarang interval sepanjang $T$, misalnya dari $0$ hingga $T$.
+
+\subsection{Kondisi Dirichlet}
+
+Deret Fourier $f(t)$ konvergen ke nilai $f(t)$ pada setiap titik di mana $f(t)$ kontinu, dengan syarat \textbf{kondisi Dirichlet} terpenuhi:
+\begin{enumerate}
+\item $f(t)$ mempunyai nilai mutlak yang dapat diintegralkan pada setiap periode, yaitu $\int_{-T/2}^{T/2}|f(t)|\,dt < \infty$.
+\item $f(t)$ mempunyai jumlah titik maksimum dan minimum yang berhingga dalam setiap periode.
+\item $f(t)$ mempunyai jumlah titik diskontinuitas yang berhingga dalam setiap periode.
+\end{enumerate}
+Pada titik diskontinuitas $t_0$, deret Fourier konvergen ke nilai tengah yaitu $\frac{1}{2}\bigl[f(t_0^-)+f(t_0^+)\bigr]$.
+
+\section{Sifat Simetri}
+
+Simetri fungsi dapat menyederhanakan perhitungan koefisien Fourier secara signifikan.
+
+\begin{enumerate}
+\item \textbf{Fungsi genap}: Jika $f(t) = f(-t)$, maka $b_n = 0$ untuk semua $n$, dan
+\[
+a_n = \frac{4}{T}\int_{0}^{T/2} f(t)\cos(n\omega_0 t)\,dt.
+\]
+\item \textbf{Fungsi ganjil}: Jika $f(t) = -f(-t)$, maka $a_n = 0$ untuk semua $n$ (termasuk $a_0$), dan
+\[
+b_n = \frac{4}{T}\int_{0}^{T/2} f(t)\sin(n\omega_0 t)\,dt.
+\]
+\end{enumerate}
+
+\section{Contoh-contoh Deret Fourier}
+
+\begin{exmp}
+\label{ex:gelombang-kotak}
+Tentukan deret Fourier dari gelombang kotak (\textit{square wave}) berikut dengan periode $T = 2$:
+\[
+f(t) = \begin{cases} 1, & 0 < t < 1 \\ -1, & -1 < t < 0. \end{cases}
+\]
+
+\textbf{Penyelesaian:}\\
+Fungsi ini adalah fungsi ganjil, sehingga $a_n = 0$ untuk semua $n$. Dengan $\omega_0 = 2\pi/T = \pi$:
+\begin{align*}
+b_n &= \frac{4}{T}\int_{0}^{T/2} f(t)\sin(n\omega_0 t)\,dt
+     = \frac{4}{2}\int_{0}^{1} \sin(n\pi t)\,dt \\
+    &= 2\left[-\frac{\cos(n\pi t)}{n\pi}\right]_0^1
+     = \frac{2}{n\pi}\bigl(1 - \cos(n\pi)\bigr)
+     = \frac{2}{n\pi}\bigl(1-(-1)^n\bigr).
+\end{align*}
+Untuk $n$ genap, $b_n = 0$. Untuk $n$ ganjil, $b_n = 4/(n\pi)$. Sehingga deret Fouriernya adalah
+\[
+f(t) = \frac{4}{\pi}\left(\sin\pi t + \frac{1}{3}\sin 3\pi t + \frac{1}{5}\sin 5\pi t + \cdots\right)
+\]
+atau
+\[
+f(t) = \frac{4}{\pi}\sum_{k=0}^{\infty}\frac{1}{2k+1}\sin\bigl((2k+1)\pi t\bigr).
+\]
+\end{exmp}
+
+\begin{exmp}
+Tentukan deret Fourier dari fungsi berikut dengan periode $T = 2\pi$:
+\[
+f(t) = \begin{cases} t, & 0 \le t < \pi \\ 0, & \pi \le t < 2\pi. \end{cases}
+\]
+
+\textbf{Penyelesaian:}\\
+Dengan $\omega_0 = 2\pi/T = 1$:
+\begin{align*}
+a_0 &= \frac{2}{2\pi}\int_{0}^{\pi} t\,dt = \frac{1}{\pi}\cdot\frac{\pi^2}{2} = \frac{\pi}{2}.
+\end{align*}
+Untuk $n \ge 1$:
+\begin{align*}
+a_n &= \frac{1}{\pi}\int_{0}^{\pi} t\cos(nt)\,dt \\
+    &= \frac{1}{\pi}\left[\frac{t\sin(nt)}{n}\Big|_0^\pi - \int_0^\pi\frac{\sin(nt)}{n}\,dt\right] \\
+    &= \frac{1}{\pi}\left[0 + \frac{\cos(nt)}{n^2}\Big|_0^\pi\right] \\
+    &= \frac{(-1)^n - 1}{n^2\pi}.
+\end{align*}
+\begin{align*}
+b_n &= \frac{1}{\pi}\int_{0}^{\pi} t\sin(nt)\,dt \\
+    &= \frac{1}{\pi}\left[-\frac{t\cos(nt)}{n}\Big|_0^\pi + \int_0^\pi\frac{\cos(nt)}{n}\,dt\right] \\
+    &= \frac{1}{\pi}\left[-\frac{\pi(-1)^n}{n} + \frac{\sin(nt)}{n^2}\Big|_0^\pi\right] \\
+    &= \frac{-(-1)^n}{n}.
+\end{align*}
+Sehingga deret Fouriernya adalah
+\begin{equation*}
+\begin{split}
+f(t) &= \frac{\pi}{4} + \sum_{n=1}^{\infty}\left[\frac{(-1)^n-1}{n^2\pi}\cos(nt) - \frac{(-1)^n}{n}\sin(nt)\right].
+\end{split}
+\end{equation*}
+\end{exmp}
+
+\section{Deret Fourier Kompleks (Eksponensial)}
+
+Selain bentuk trigonometri, deret Fourier juga dapat dinyatakan dalam bentuk \textbf{deret Fourier kompleks} (atau eksponensial) menggunakan identitas Euler:
+\[
+\cos\theta = \frac{e^{j\theta}+e^{-j\theta}}{2}, \qquad \sin\theta = \frac{e^{j\theta}-e^{-j\theta}}{2j}.
+\]
+
+Deret Fourier kompleks dari $f(t)$ dengan periode $T$ didefinisikan sebagai
+\begin{equation}
+f(t) = \sum_{n=-\infty}^{\infty} c_n\,e^{jn\omega_0 t},
+\label{eq:fourier-kompleks}
+\end{equation}
+dengan koefisien
+\begin{equation}
+c_n = \frac{1}{T}\int_{-T/2}^{T/2} f(t)\,e^{-jn\omega_0 t}\,dt, \quad n = 0,\pm 1, \pm 2, \ldots
+\label{eq:cn}
+\end{equation}
+
+Hubungan antara koefisien trigonometri dan koefisien kompleks adalah:
+\[
+c_0 = \frac{a_0}{2}, \quad c_n = \frac{a_n - jb_n}{2}, \quad c_{-n} = \frac{a_n + jb_n}{2}, \quad n \ge 1.
+\]
+
+\subsection{Spektrum Sinyal}
+
+Koefisien $c_n$ pada umumnya merupakan bilangan kompleks. Besarnya, $|c_n|$, disebut \textbf{spektrum amplitudo}, dan argumennya, $\angle c_n$, disebut \textbf{spektrum fasa}. Bersama-sama keduanya menggambarkan distribusi energi sinyal pada masing-masing frekuensi harmonik $n\omega_0$.
+
+\begin{exmp}
+Tentukan deret Fourier kompleks dari gelombang kotak pada Contoh~\ref{ex:gelombang-kotak}.
+
+\textbf{Penyelesaian:}\\
+Karena $f(t)$ adalah fungsi ganjil, $c_n$ adalah bilangan imajiner murni. Dari hubungan $c_n = (a_n - jb_n)/2 = -jb_n/2$:
+\[
+c_n = -j\frac{b_n}{2} = \begin{cases} 0, & n \text{ genap} \\ \dfrac{-j\cdot 4}{2n\pi} = \dfrac{-2j}{n\pi}, & n \text{ ganjil}. \end{cases}
+\]
+Atau secara langsung dengan persamaan~\ref{eq:cn} ($T=2$, $\omega_0=\pi$):
+\[
+c_n = \frac{1}{2}\int_{-1}^{1}f(t)e^{-jn\pi t}\,dt
+    = \frac{1}{2}\left[\int_{-1}^{0}(-1)e^{-jn\pi t}\,dt + \int_{0}^{1}e^{-jn\pi t}\,dt\right]
+    = \frac{1-(-1)^n}{jn\pi} = \frac{j((-1)^n-1)}{n\pi}.
+\]
+Sehingga deret Fourier kompleksnya adalah
+\[
+f(t) = \sum_{\substack{n=-\infty\\n\neq 0}}^{\infty} \frac{j((-1)^n-1)}{n\pi}\,e^{jn\pi t}.
+\]
+\end{exmp}
+
+\section{Parseval untuk Deret Fourier}
+
+Teorema Parseval menyatakan bahwa daya rata-rata sinyal periodik sama dengan jumlah daya masing-masing komponen harmoniknya. Untuk fungsi $f(t)$ dengan periode $T$:
+\begin{equation}
+\begin{split}
+\frac{1}{T}\int_{-T/2}^{T/2}|f(t)|^2\,dt &= \sum_{n=-\infty}^{\infty}|c_n|^2 \\
+&= \frac{a_0^2}{4}+\frac{1}{2}\sum_{n=1}^{\infty}(a_n^2+b_n^2).
+\end{split}
+\label{eq:parseval}
+\end{equation}
+Persamaan~\ref{eq:parseval} berguna untuk menghitung daya suatu sinyal dari koefisien Fourier-nya tanpa harus mengintegralkan kuadrat fungsi secara langsung.
+
+
+
+\section*{Rangkuman}
+
+Pada bab ini telah dibahas \textbf{Deret Fourier} sebagai alat untuk merepresentasikan fungsi periodik sebagai superposisi sinus dan kosinus. Bentuk trigonometri deret Fourier dari fungsi periodik $f(t)$ dengan periode $T$ adalah
+\[
+f(t) = \frac{a_0}{2} + \sum_{n=1}^{\infty}\bigl[a_n \cos(n\omega_0 t) + b_n \sin(n\omega_0 t)\bigr],
+\]
+dengan koefisien Fourier $a_n$ dan $b_n$ diperoleh melalui integral selama satu periode. Deret Fourier konvergen pada titik-titik kekontinuan jika \textbf{kondisi Dirichlet} terpenuhi; pada titik diskontinuitas, deret konvergen ke nilai rata-rata satu sisi.
+
+Sifat simetri fungsi (genap atau ganjil) menyederhanakan komputasi koefisien secara signifikan. Deret Fourier juga dapat dinyatakan dalam bentuk \textbf{eksponensial kompleks} dengan koefisien $c_n$, yang memberikan gambaran \textbf{spektrum amplitudo} $|c_n|$ dan \textbf{spektrum fasa} $\angle c_n$. \textbf{Teorema Parseval} menyatakan kekekalan daya: daya rata-rata sinyal sama dengan jumlah daya seluruh komponen harmoniknya.
+
+\section*{Latihan Soal}
+
+\begin{enumerate}
+  \item Tentukan deret Fourier trigonometri dari fungsi gelombang segitiga dengan periode $T = 2\pi$:
+  \[
+    f(t) = \begin{cases} t, & 0 \le t < \pi \\ 2\pi - t, & \pi \le t < 2\pi. \end{cases}
+  \]
+  \item Tentukan deret Fourier dari gelombang gigi gergaji $f(t) = t/\pi$ untuk $-\pi < t < \pi$ dengan periode $T = 2\pi$!
+  \item Hitunglah koefisien Fourier kompleks $c_n$ dari fungsi periodik $f(t) = |\cos t|$ dengan periode $T = \pi$!
+  \item Gunakan teorema Parseval untuk menunjukkan bahwa $\displaystyle\sum_{n=1}^{\infty}\frac{1}{n^2} = \frac{\pi^2}{6}$. (\textit{Petunjuk:} gunakan deret Fourier dari fungsi $f(t) = t$ pada $[-\pi, \pi]$.)
+  \item Tentukan spektrum amplitudo $|c_n|$ dan gambarkan sketsa spektrumnya untuk gelombang kotak pada Contoh~\ref{ex:gelombang-kotak}!
+\end{enumerate}

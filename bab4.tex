@@ -1,0 +1,1391 @@
+\chapter{Interpolasi}
+\section*{Pengantar}
+Masalah utama pada interpolasi adalah mencari fungsi $y = \phi(x)$ yang merupakan pendekatan untuk fungsi sebenarnya $y = f(x)$ dalam interval tertentu. Jika $\phi(x)$ berupa polinomial, maka proses ini dinamakan interpolasi polinomial. Bila $\phi(x)$ berupa deret trigonometri tak berhingga, maka prosesnya disebut interpolasi trigonometri.
+
+Dalam praktek kita selalu memilih $\phi(x)$ sebagai fungsi yang paling sederhana yang memenuhi data yang ada. Karena polinomial merupakan fungsi yang paling sederhana, maka biasanya $\phi(x)$ dipilih sebagai polinomial sebagaimana kebanyakan rumus interpolasi yang kita kenal. Namun bila fungsinya periodik, maka sebaiknya $\phi(x)$ dipilih sebagai fungsi atau deret trigonometri.
+
+Pada Bab~2 telah dibahas berbagai jenis fungsi dan sifat-sifatnya, dan pada Bab~3 telah dipelajari metode pendekatan akar yang mencari titik nol fungsi. Dalam praktik rekayasa, seringkali fungsi sebenarnya $y = f(x)$ tidak diketahui secara eksplisit, melainkan hanya tersedia sebagai sekumpulan data diskret (titik-titik pengamatan). Interpolasi adalah proses menemukan fungsi pendekatan $y = \phi(x)$ yang melewati semua titik data tersebut, sehingga kita dapat mengestimasi nilai fungsi di antara titik-titik data.
+
+
+\section{Beda}
+Jika $y_0,~ y_1,~ \cdots,~ y_n$ menyatakan nilai-nilai fungsi $y=f(x)$, maka $y_1-y_0,~ y_2-y_1,~ y_3-y_2,~ \cdots,~ y_n-y_{n-1}$ disebut beda pertama dari fungsi $y$ dan masing-masing kita beri notasi $\Delta y_0,~ \Delta y_1,~ \cdots,~ \Delta y_{n-1}$. Selanjutnya beda dari beda pertama ini dinamakan beda kedua, yang kita beri tanda $\Delta^2 y_0 = \Delta y_1 - \Delta y_0,~ \Delta^2 y_1 = \Delta y_2 - \Delta y_1, \cdots$ dan seterusnya. Dengan cara yang sama didapat beda ketiga $\Delta^3 y_0 = \Delta^2 y_1 - \Delta^2 y_0,~ \Delta^3 y_1 = \Delta^2 y_2 - \Delta^2 y_1,~ \cdots$ dan seterusnya. Secara umum beda ke-$m$ adalah
+
+\begin{equation}
+\Delta^m y_n ~=~ \Delta^{m-1} y_{n+1} ~-~ \Delta^{m-1} y_n
+\end{equation}
+
+Dengan demikian maka kita dapatkan tabel beda diagonal berikut (Tabel \ref{tabel:BedaDiagonal}),
+
+\begin{table}[!htbp]
+\centering
+\caption{Beda diagonal}
+\label{tabel:BedaDiagonal}
+\begin{tabular}{@{}|c|c|c|c|c|@{}}
+\hline
+$x$  & $y$  & $\Delta y$     & $\Delta^2 y$ & $\Delta^3 y$ \\\hline
+$x_0$ & $y_0$ &             &          &          \\
+   &    & $\Delta y_0$ &          &          \\
+$x_1$ & $y_1$ &             & $\Delta^2 y_0$      &          \\
+   &    & $\Delta y_1$      &          & $\Delta^3 y_0$      \\
+$x_2$ & $y_2$ &             & $\Delta^2 y_1$      &          \\
+   &    & $\Delta y_2$    &          &          \\
+$x_3$ & $y_3$ &             &          &          \\ \hline
+\end{tabular}
+\end{table}
+
+atau secara numerik dinyatakan sebagai berikut (Tabel \ref{tabel:BedaDiagonalNumerik})
+
+\begin{table}[!htbp]
+\centering
+\caption{Tabel beda diagonal secara numerik}
+\label{tabel:BedaDiagonalNumerik}
+\begin{tabular}{@{}|c|c|c|c|c|@{}}
+\hline
+$y$   & $\Delta y$  & $\Delta^2 y$       & $\Delta^3 y$              & $\Delta^4 y$                     \\ \hline
+$y_0$ &             &                    &                           &                                  \\
+      & $y_1 - y_0$ &                    &                           &                                  \\
+$y_1$ &             & $y_2 - 2y_1 + y_0$ &                           &                                  \\
+      & $y_2 - y_1$ &                    & $y_3 - 3y_2 + 3y_1 - y_0$ &                                  \\
+$y_2$ &             & $y_3 - 2y_2 + y_1$ &                           & $y_4 - 4y_3 + 6y_2 - 4y_1 + y_0$ \\
+      & $y_3 - y_2$ &                    & $y_4 - 3y_3 + 3y_2 - y_1$ &                                  \\
+$y_3$ &             & $y_4 - 2y_3 + y_2$ &                           & $y_5 - 4y_4 + 6y_3 - 4y_2 + y_1$ \\
+      & $y_4 - y_3$ &                    & $y_5 - 3y_4 + 3y_3 - y_2$ &                                  \\
+$y_4$ &             & $y_5 - 2y_4 + y_3$ &                           &                                  \\
+      & $y_5 - y_4$ &                    &                           &                                  \\ 
+$y_5$ &             &                    &                           &                                  \\ \hline
+\end{tabular}
+\end{table}
+
+Ternyata koefisiennya merupakan koefisien \textit{Pascal} (\textit{Binomium Newton}) dengan tanda selang-seling positif-negatif. Jadi kita peroleh rumus umum pada persamaan \ref{rumus:PersUmumBeda}
+
+\begin{equation}\label{rumus:PersUmumBeda}
+\begin{split}
+\Delta^m y_n = &~ y_{n+m} - m y_{n+m-1} + \frac{m(m-1)}{2!}y_{n+m-2} \\
+		& - \frac{m(m-1)(m-2)}{3!}y_{n+m-3} + \cdots \\
+		& + (-1)^k \frac{m(m-1)(m-2) \cdots (m-k+1)}{k!}y_{n+m-k} + \cdots \\
+		& + (-1)^m y_n,~~n \geq 0
+\end{split}
+\end{equation}
+
+Untuk banyak keperluan yang lain kita juga menggunakan tabel beda horizontal berikut ini
+
+\begin{table}[!htbp]
+\centering
+\caption{Tabel beda horizontal}
+\label{tabel:BedaHorizontal}
+\begin{tabular}{@{}|c|c|c|c|c|c|c|@{}}
+\hline
+$x$	& $y$	& $\Delta_1 y$		& $\Delta_2 y$		& $\Delta_3 y$		& $\Delta_4 y$		& $\Delta_5 y$		\\ \hline
+$x_0$	& $y_0$	&  			& 			& 			&			& 			\\
+$x_1$	& $y_1$	& $\Delta_1 y_1$	&			& 			& 			& 			\\
+$x_2$	& $y_2$	& $\Delta_1 y_2$	& $\Delta_2 y_2$	& 			& 			& 			\\
+$x_3$	& $y_3$	& $\Delta_1 y_3$	& $\Delta_2 y_3$	& $\Delta_3 y_3$	& 			& 			\\
+$x_4$	& $y_4$	& $\Delta_1 y_4$	& $\Delta_2 y_4$	& $\Delta_3 y_4$	& $\Delta_4 y_4$	& 			\\
+$x_5$	& $y_5$	& $\Delta_1 y_5$	& $\Delta_2 y_5$	& $\Delta_3 y_5$	& $\Delta_4 y_5$	& $\Delta_5 y_5$	\\ \hline
+\end{tabular}
+\end{table}
+
+Secara numerik, tabel beda horizontal dinyatakan pada tabel \ref{tabel:BedaHorizontalNumerik}
+
+\begin{table}[!htbp]
+\centering
+\caption{Tabel beda horizontal secara numerik}
+\label{tabel:BedaHorizontalNumerik}
+\begin{tabular}{@{}|c|c|c|c|c|@{}}
+\hline
+$y$	& $\Delta_1 y$	& $\Delta_2 y$		& $\Delta_3 y$			& $\Delta_4 y$				\\[1ex] \hline
+$y_0$	& 		&  			& 				&					\\[1ex]
+$y_1$	& $y_1 - y_0$	& 			&				&					\\[1ex]
+$y_2$	& $y_2 - y_1$	& $y_2 - 2y_1 + y_0$	& 				&					\\[1ex]
+$y_3$	& $y_3 - y_2$	& $y_3 - 2y_2 + y_1$	& $y_3 - 3y_2 + 3y_1 - y_0$	&					\\[1ex]
+$y_4$	& $y_4 - y_3$	& $y_4 - 2y_3 + y_2$	& $y_4 - 3y_3 + 3y_2 - y_1$	& $y_4 - 4y_3 + 6y_2 - 4y_1 + y_0$	\\[1ex]
+$y_5$	& $y_5 - y_4$	& $y_5 - 2y_4 + y_3$	& $y_5 - 3y_4 + 3y_3 - y_2$	& $y_5 - 4y_4 + 6y_3 - 4y_2 + y_1$	\\[1ex] \hline
+\end{tabular}
+\end{table}
+
+Jadi secara umum kita peroleh persamaan \ref{rumus:PersUmumBedaHorizontal},
+
+\begin{equation} \label{rumus:PersUmumBedaHorizontal}
+\begin{split}
+\Delta_m y_n = &~ y_{n} - m y_{n-1} + \frac{m(m-1)}{2!}y_{n-2} \\
+		& - \frac{m(m-1)(m-2)}{3!}y_{n-3} + \cdots \\
+		& + (-1)^k \frac{m(m-1)(m-2) \cdots (m-k+1)}{k!}y_{n-k} + \cdots \\
+		& + (-1)^m y_{n-m},~~n-m \geq 0
+\end{split}
+\end{equation}
+
+Dari persamaan \ref{rumus:PersUmumBeda} dan \ref{rumus:PersUmumBedaHorizontal} dapat disimpulkan bahwa
+
+\begin{equation}
+\Delta^m y_n = \Delta_m y_{n+m} ~~\text{atau}~~ \Delta_m y_n = \Delta^m y_{n-m}
+\end{equation}
+
+Kadang-kadang $\Delta_m$ ditulis sebagai $\nabla^m$.
+
+\section{Pengaruh kesalahan pada nilai tabel}
+Misalkan $y_0,~y_1,~y_2,~\cdots,~y_n$ sebagai nilai benar suatu fungsi, dan anggap bahwa nilai $y_5$ mengalami kesalahan $\varepsilon$, sehingga nilai salahnya adalah $y_5 + \varepsilon$. Kita akan menyelidiki penjalaran kesalahan ini. Bila kita buat beda berurutan untuk $y$ maka kita peroleh tabel berikut (Tabel \ref{tabel:KesalahanTabelBeda}).
+
+\begin{table}[!htbp]
+\centering
+\caption{Tabel penjalaran kesalahan}
+\label{tabel:KesalahanTabelBeda}
+\begin{tabular}{@{}|c|c|c|c|c|c|c|@{}}
+\hline
+$y$			& $\Delta y$			& $\Delta^2 y$			& $\Delta^3 y$				& $\Delta^4 y$			& $\Delta^5 y$			& $\Delta^6 y$	\\ \hline
+$y_0$			& 				&  				& 					&				&				&		\\
+ 			& $\Delta y_0$			&  				& 					&				&				&		\\
+$y_1$ 			& 				& $\Delta^2 y_0$		& 					&				&				&		\\
+ 			& $\Delta y_1$			& 				& $\Delta^3 y_0$ 			&				&				&		\\
+$y_2$ 			& 				& $\Delta^2 y_1$		& 		 			& $\Delta^4 y_0$		&				&		\\
+ 			& $\Delta y_2$			& 				& $\Delta^3 y_1$ 			&				& $\Delta^5 y_0 + \varepsilon$	&		\\
+$y_3$ 			& 				& $\Delta^2 y_2$		& 		 			& $\Delta^4 y_1 + \varepsilon$	&				& $\Delta^6 y_0 - 6\varepsilon$	\\
+ 			& $\Delta y_3$			& 				& $\Delta^3 y_2 + \varepsilon$ 		&				& $\Delta^5 y_1 - 5\varepsilon$	&		\\
+$y_4$ 			& 				& $\Delta^2 y_3 + \varepsilon$	& 		 			& $\Delta^4 y_2 - 4\varepsilon$	&				& $\Delta^6 y_1 + 15\varepsilon$	\\
+ 			& $\Delta y_4 + \varepsilon$	& 				& $\Delta^3 y_3 - 3\varepsilon$ 	&				& $\Delta^5 y_2 + 10\varepsilon$	&		\\
+$y_5 + \varepsilon$ 	& 				& $\Delta^2 y_4 - 2\varepsilon$	& 		 			& $\Delta^4 y_3 + 6\varepsilon$	&				& $\Delta^6 y_2 - 20\varepsilon$	\\
+ 			& $\Delta y_5 - \varepsilon$	& 				& $\Delta^3 y_4 + 3\varepsilon$ 	&				& $\Delta^5 y_3 - 10\varepsilon$	&		\\
+$y_6$ 			& 				& $\Delta^2 y_5 + \varepsilon$	& 		 			& $\Delta^4 y_4 - 4\varepsilon$	&				& $\Delta^6 y_3 + 15\varepsilon$	\\
+ 			& $\Delta y_6$			& 				& $\Delta^3 y_5 - \varepsilon$ 		&				& $\Delta^5 y_4 + 5\varepsilon$	&		\\
+$y_7$ 			& 				& $\Delta^2 y_6$		& 		 			& $\Delta^4 y_5 + \varepsilon$	&				& $\Delta^6 y_4 - 6\varepsilon$	\\
+ 			& $\Delta y_7$			& 				& $\Delta^3 y_6$			& 	& $\Delta^5 y_5- \varepsilon$				& 		\\
+$y_8$ 			& 				& $\Delta^2 y_7$		& 		 			& $\Delta^4 y_6$		&				&		\\
+ 			& $\Delta y_8$			& 				& $\Delta^3 y_7$ 			&				&				&		\\
+$y_9$ 			& 				& $\Delta^2 y_8$		& 					&				&				&		\\
+ 			& $\Delta y_9$			&  				& 					&				&				&		\\
+$y_{10}$			& 				&  				& 					&				&				&		\\	\hline
+\end{tabular}
+\end{table}
+
+Tabel \ref{tabel:KesalahanTabelBeda} ini menunjukkan bahwa pengaruh kesalahan meningkat pada beda berikutnya, dan ternyata pula bahwa koefisien $\varepsilon$ merupakan koefisien \textit{binomium} dan tanda berselang-seling. Kita lihat pula bahwa jumlah aljabar kesalahan-kesalahan tersebut pada sembarang kolom beda adalah nol.
+
+Juga ternyata kesalahan maksimum pada beda tersebut berada pada garis horizontal yang sama dengan nilai tabel yang salah. Tabel berikut (Tabel \ref{tabel:PengaruhKesalahanBedaHorizon}) menunjukkan pengaruh kesalahan pada beda horizontal. Juga di sini pengaruh kesalahan sama seperti pada tabel sebelumnya, tapi pada tabel ini beda salah pertama dari sembarang orde berada pada garis horizontal yang sama dengan nilai tabel yang salah.
+
+\begin{table}[!htbp]
+\centering
+\caption{Tabel pengaruh kesalahan pada beda horizontal}
+\label{tabel:PengaruhKesalahanBedaHorizon}
+\begin{tabular}{@{}|c|c|c|c|c|c|c|@{}}
+\hline
+$y$			& $\Delta_1 y$			& $\Delta_2 y$			& $\Delta_3 y$			& $\Delta_4 y$			& $\Delta_5 y$			& $\Delta_6 y$\\[1ex]
+\hline
+$y_0$			&				&				&				&				&			&\\[1ex]
+$y_1$			& $\Delta_1 y_1$		&				&				&				&			&\\[1ex]
+$y_2$			& $\Delta_1 y_2$		& $\Delta_2 y_2$		&				&				&			&\\[1ex]
+$y_3$			& $\Delta_1 y_3$		& $\Delta_2 y_3$		& $\Delta_3 y_3$		&				&			&\\[1ex]
+$y_4$			& $\Delta_1 y_4$		& $\Delta_2 y_4$		& $\Delta_3 y_4$		& $\Delta_4 y_4$			&			&\\[1ex]
+$y_5 + \varepsilon$	& $\Delta_1 y_5 + \varepsilon$	& $\Delta_2 y_5 + \varepsilon$	& $\Delta_3 y_5 + \varepsilon$	& $\Delta_4 y_5 + \varepsilon$	& $\Delta_5 y_5 + \varepsilon$	&\\[1ex]
+$y_6$			& $\Delta_1 y_6 - \varepsilon$	& $\Delta_2 y_6 - 2\varepsilon$	& $\Delta_3 y_6 - 3\varepsilon$	& $\Delta_4 y_6 - 4\varepsilon$	& $\Delta_5 y_6 - 5\varepsilon$	& $\Delta_6 y_6 - 6\varepsilon$\\[1ex]
+$y_7$			& $\Delta_1 y_7$		& $\Delta_2 y_7 + \varepsilon$	& $\Delta_3 y_7 + 3\varepsilon$	& $\Delta_4 y_7 + 6\varepsilon$	& $\Delta_5 y_7 + 10\varepsilon$	& $\Delta_6 y_7 + 15\varepsilon$\\[1ex]
+$y_8$			& $\Delta_1 y_8$		& $\Delta_2 y_8$	& $\Delta_3 y_8 - \varepsilon$	& $\Delta_4 y_8 - 4\varepsilon$	& $\Delta_5 y_8 - 10\varepsilon$	& $\Delta_6 y_8 - 20\varepsilon$\\[1ex]
+$y_9$			& $\Delta_1 y_9$		& $\Delta_2 y_9$		& $\Delta_3 y_9$		& $\Delta_4 y_9 + \varepsilon$	& $\Delta_5 y_9 + 5\varepsilon$	& $\Delta_6 y_9 + 15\varepsilon$\\[1ex]
+$y_{10}$			& $\Delta_1 y_{10}$		& $\Delta_2 y_{10}$		& $\Delta_3 y_{10}$		& $\Delta_4 y_{10}$		& $\Delta_5 y_{10} - \varepsilon$	& $\Delta_6 y_{10} - 6\varepsilon$\\[1ex] \hline
+\end{tabular}
+\end{table}
+
+Dengan kaidah di atas kita dapat melacak kesalahan sampai pada sumbernya dan kemudian membetulkannya. Sebagai gambaran perhatikan contoh berikut.
+
+\begin{exmp}\end{exmp}
+Lacaklah kesalahan tabel \ref{tabel:ContohSoalKesalahanBedaHorizon} berikut dan kemudian betulkan
+
+\begin{table}[!htbp]
+\centering
+\caption{Tabel kesalahan beda horizontal}
+\label{tabel:ContohSoalKesalahanBedaHorizon}
+\begin{tabular}{@{}|c|c|c|c|c|c|c|c|@{}}
+\hline
+ & $x$ & $y$ & $\Delta_1 y$ & $\Delta_2 y$ & $\Delta_3 y$ & $\Delta_4 y$ & $\varepsilon$ \\[0.3ex]
+\hline
+$0$ & $0.10$ & $0.09983$ & & & & & \\[0.3ex]
+$1$ & $0.15$ & $0.14944$ & $4961$ & & & & \\[0.3ex]
+$2$ & $0.20$ & $0.19867$ & $4923$ & $-38$ & & & \\[0.3ex]
+$3$ & $0.25$ & $0.24740$ & $4873$ & $-50$ & $-12$ & & \\[0.3ex]
+$4$ & $0.30$ & $0.29552$ & $4812$ & $-61$ & $-11$ & $1$ & \\[0.3ex]
+$5$ & $0.35$ & $0.34290$ & $4738$ & $-74$ & $-13$ & $-2$ & \\[0.3ex]
+$6$ & $0.40$ & $0.38945$ & $4655$ & $-83$ & $-9$ & $4$ & $\varepsilon$\\[0.3ex]
+$7$ & $0.45$ & $0.43497$ & $4552$ & $-103$ & $-20$ & $-11$ & $-4\varepsilon$\\[0.3ex]
+$8$ & $0.50$ & $0.47943$ & $4446$ & $-106$ & $-3$ & $17$ & $6\varepsilon$\\[0.3ex]
+$9$ & $0.55$ & $0.52269$ & $4326$ & $-120$ & $-14$ & $-11$ & $-4\varepsilon$\\[0.3ex]
+$10$ & $0.60$ & $0.56464$ & $4195$ & $-131$ & $-11$ & $3$ & $\varepsilon$\\[0.3ex]
+$11$ & $0.65$ & $0.60519$ & $4055$ & $-140$ & $-9$ & $2$ & \\[0.3ex]
+$12$ & $0.70$ & $0.64422$ & $3903$ & $-152$ & $-12$ & $-3$ & \\[0.3ex]
+\hline
+\end{tabular}
+\end{table}
+
+{\bf Jawab :}
+
+Pada tabel \ref{tabel:ContohSoalKesalahanBedaHorizon} di atas terlihat bahwa beda ketiga sangat tidak teratur di dekat pertengahan kolom tersebut, dan beda keempat masih lebih tak beraturan. Pada tiap-tiap kolom, ketidakteraturan itu dimulai pada garis horizontal yang bersesuaian dengan $x=0.40$
+
+Karena jumlah aljabar beda keempat $\lim \Delta_4 y = 0$, maka beda keempat yang diperoleh pada contoh ini merupakan akumulasi (penumpukan) kesalahan. Berdasarkan tabel beda horizontal yang mengalami kesalahan kita dapatkan,
+\begin{align*} 
+\varepsilon &= 4\cdot 10^{-5} & & \rightarrow & \varepsilon &= 0.00004\\
+-4\varepsilon &= -11\cdot 10^{-5} & &\rightarrow & \varepsilon &= 0.0000275\\
+6\varepsilon &= 17\cdot 10^{-5} & &\rightarrow & \varepsilon &= 0.00002833333333\\
+-4\varepsilon &= -11\cdot 10^{-5} & &\rightarrow & \varepsilon &= 0.0000275\\
+\varepsilon &= 3\cdot 10^{-5} & &\rightarrow & \varepsilon &= 0.00003
+\end{align*}
+Didapat rata-rata $\varepsilon = 3.066666667 \cdot 10^{-5} \approx 0.00003$. Jadi nilai benar untuk $y_6$ adalah $y_6 = 0.38945 - \varepsilon = 0.38942$. Dengan demikian tabel tersebut telah dikoreksi. Untuk jelasnya perhatikan tabel perbaikan berikut ini (Tabel \ref{tabel:JawabanContohSoalKesalahanBedaHorizon}).
+
+\begin{table}[!htbp]
+\centering
+\caption{Tabel perbaikan beda horizontal}
+\label{tabel:JawabanContohSoalKesalahanBedaHorizon}
+\begin{tabular}{@{}|c|c|c|c|c|c|@{}}
+\hline
+$x$ & $y$ & $\Delta_1 y$ & $\Delta_2 y$ & $\Delta_3 y$ & $\Delta_4 y$ \\[0.3ex]
+\hline
+$0.10$ & $0.09983$ & & & &\\[0.3ex]
+$0.15$ & $0.14944$ & $4961$ & & & \\[0.3ex]
+$0.20$ & $0.19867$ & $4923$ & $-38$ & &  \\[0.3ex]
+$0.25$ & $0.24740$ & $4873$ & $-50$ & $-12$ & \\[0.3ex]
+$0.30$ & $0.29552$ & $4812$ & $-61$ & $-11$ & $1$\\[0.3ex]
+$0.35$ & $0.34290$ & $4738$ & $-74$ & $-13$ & $-2$\\[0.3ex]
+$0.40$ & $0.38942$ & $4652$ & $-86$ & $-12$ & $1$\\[0.3ex]
+$0.45$ & $0.43497$ & $4555$ & $-97$ & $-11$ & $1$\\[0.3ex]
+$0.50$ & $0.47943$ & $4446$ & $-109$ & $-12$ & $-1$\\[0.3ex]
+$0.55$ & $0.52269$ & $4326$ & $-120$ & $-11$ & $1$\\[0.3ex]
+$0.60$ & $0.56464$ & $4195$ & $-131$ & $-11$ & $0$\\[0.3ex]
+$0.65$ & $0.60519$ & $4055$ & $-140$ & $-9$ & $2$\\[0.3ex]
+$0.70$ & $0.64422$ & $3903$ & $-152$ & $-12$ & $-3$\\[0.3ex]
+\hline
+\end{tabular}
+\end{table}
+
+Dari tabel \ref{tabel:JawabanContohSoalKesalahanBedaHorizon} tersebut terlihat bahwa beda ketiga praktis konstan.
+
+Jika suatu data mengalami kesalahan, maka beda dengan orde tertentu akan bergantian tanda. Bila beberapa nilai tabel mengalami kesalahan maka beda berurutan dari fungsi tersebut akan tidak beraturan, tapi bukanlah hal yang mudah untuk menentukan sumber dan besar kesalahan-kesalahan yang terpisah. Umumnya data diperoleh dari pengukuran atau perhitungan, sehingga kesalahan yang mungkin timbul adalah kesalahan pengukuran atau kesalahan pembulatan hasil perhitungan. Dalam hal terjadi kesalahan maka beda dengan orde lebih tinggi semakin tidak beraturan. Oleh karena itu disarankan untuk tidak menggunakan beda yang lebih tinggi dari orde 4.
+
+Pada tabel di atas, untuk menghemat tempat maka kolom beda hanya diisi angka signifikan. Jadi misalnya $\Delta_1 y_1 = 4961$ berarti $\Delta_1 y_1 = 4961$ dikalikan dengan $10^{-5}$, demikian pula untuk beda lainnya pada tabel tersebut harus dikalikan lagi dengan $10^{-5}$, karena nilai $y$ teliti hingga $5$ desimal.
+
+\section{Beda polinomial}
+Sekarang kita hitung beda berurutan dari suatu polinomial dengan derajat $n$. Kita punyai
+
+\begin{equation}\label{pers:PoliDerajatN}
+y = f(x) = a_0 x^n + a_1 x^{n-1} + a_2 x^{n-2} + \cdots + a_{n-1} x + a_n
+\end{equation}
+
+sehingga untuk $h = \Delta x$ kita dapatkan
+
+\begin{equation}\label{pers:PoliDerajatN+h}
+\begin{split}
+y + \Delta y =~& a_0 (x+h)^n + a_1(x+h)^{n-1} + a_2(x+h)^{n-2} + \cdots + \\
+&a_{n-1}(x+h) + a_n
+\end{split}
+\end{equation}
+
+Persamaan \ref{pers:PoliDerajatN+h} kita kurangi dengan \ref{pers:PoliDerajatN}, maka kita dapatkan
+
+\begin{equation}\label{pers:BedaPolinomial}
+\begin{split}
+\Delta y =~& a_0\{(x+h)^n - x^n\} + a_1\{(x+h)^{n-1} - x^{n-1}\} + \\
+&a_2\{(x+h)^{n-2} - x^{n-2}\} + \cdots + a_{n-1}h
+\end{split}
+\end{equation}
+
+Dengan mengekspansikan $(x+h)^n, (x+h)^{n-1}$ dan seterusnya menurut teorema binomium, maka kita dapatkan
+
+\begin{equation}\label{pers:BedaPolinomialBinomium}
+\begin{split}
+\Delta y =~& a_0 \left\{ nhx^{n-1} + \frac{n(n-1)}{2!}h^2x^{n-2} + \frac{n(n-1)(n-2)}{3!}h^3x^{n-3} + \cdots \right\} +\\
+& a_1 \left\{ (n-1)hx^{n-2} + \frac{(n-1)(n-2)}{2!}h^2x^{n-3} + \cdots \right\} +\\
+& a_2 \left\{ (n-2)hx^{n-3} + \frac{(n-2)(n-3)}{3!}h^2x^{n-4} + \cdots \right\} + \cdots +\\
+& a_{n-1}h\\
+=~& a_0nhx^{n-1} + \left\{\frac{n(n-1)}{2!} a_0h^2 + (n-1)a_1h \right\}x^{n-2} + \\
+& \left\{ \frac{n(n-1)(n-2)}{3!}a_0 h^3 + \frac{(n-1)(n-2)}{2!}a_1h^2 + (n-2)a_2h \right\} x^{n-3} + \cdots
+\end{split}
+\end{equation}
+
+Jika $h$ konstan, maka koefisien-koefisien $x^{n-2}, x^{n-3}$ dan seterusnya adalah konstan, sehingga kita dapat menggantinya dengan $a_1^*, a_2^*$, dan seterusnya. Maka persamaan \ref{pers:BedaPolinomialBinomium} menjadi
+
+\begin{equation}\label{pers:BedaPolinomialStar}
+\Delta y = a_0nhx^{n-1} + a_1^*x^{n-2} + a_2^*x^{n-3} + \cdots + a_{n-2}^*x + a_{n-1}^*
+\end{equation}
+
+Jadi beda pertama suatu polinomial derajat $n$ merupakan polinomial lain dengan derajat $n-1$. Untuk mendapatkan beda kedua maka kita tambah $x$ dengan $\Delta x = h$ pada persamaan \ref{pers:BedaPolinomialStar}, sehingga kita peroleh
+
+\begin{equation}\label{pers:Beda2PolinomialStar}
+\begin{split}
+\Delta y + \Delta(\Delta y) =~& a_0nh(x+h)^{n-1} + a_1^*(x+h)^{n-2} + a_2^*(x+h)^{n-3} + \cdots +\\
+=~& a_{n-2}^* (x+h) + a_{n-1}^*
+\end{split}
+\end{equation}
+
+Kita kurangi persamaan \ref{pers:Beda2PolinomialStar} dengan \ref{pers:BedaPolinomialStar} maka kita peroleh
+
+\begin{equation}\label{pers:BedaBedaPoli}
+\begin{split}
+\Delta(\Delta y) =~& a_0nh\left\{ (x+h)^{n-1} - x^{n-1} \right\} + a_1^*\left\{ (x+h)^{n-2} - x^{n-2} \right\} + \\
+& a_2^*\left\{ (x+h)^{n-3} - x^{n-3} \right\} + \cdots + a_{n-2}^*h
+\end{split}
+\end{equation}
+
+Kita proses persamaan \ref{pers:BedaBedaPoli} seperti \ref{pers:BedaPolinomial} maka kita dapatkan
+
+\begin{equation}
+\begin{split}
+\Delta^2y =~& a_0n(n-1)h^2x^{n-2} + a_1^{**}x^{n-3} + a_2^{**}x^{n-4} + \cdots + \\
+&a_{n-3}^{**}x + a_{n-2}^{**}
+\end{split}
+\end{equation}
+
+yang ternyata merupakan polinomial berderajat $n-2$. Dengan meneruskan proses ini maka diperoleh
+
+\begin{equation}
+\Delta^ny = a_0\left\{ n(n-1)(n-2) ~\cdots~ 2 \cdot 1 \right\}h^nx^{n-n} = a_0h^nn!
+\end{equation}
+
+\section{Rumus Newton untuk interpolasi maju}
+Masalah kita berikutnya adalah mendapatkan polinomial yang cocok untuk menggantikan sembarang fungsi tertentu dalam interval tertentu. Misalkan $y = f(x)$ menyatakan fungsi yang bernilai $y_0, y_1, \cdots, y_n$ untuk nilai-nilai berjarak sama $x_0, x_1, \cdots, x_n$ dari variabel bebas $x$, dan misalkan $\phi(x)$ sebagai polinomial berderajat $n$. Polinomial ini dapat ditulis sebagai
+
+\begin{equation}\label{pers:PoliPhi}
+\begin{split}
+\phi(x) =~&a_0 + a_1(x-x_0) + a_2(x-x_0)(x-x_1) + \\
+&a_3(x-x_0)(x-x_1)(x-x_2) + \\
+&a_4(x-x_0)(x-x_1)(x-x_2)(x-x_3) + \cdots +\\
+&a_n(x-x_0)(x-x_1)(x-x_2)(x-x_3)\cdots(x-x_{n-1})\\
+\end{split}
+\end{equation}
+
+Kita akan menentukan $a_0, a_1, \cdots, a_n$ sedemikian hingga $\phi(x_i) = y_i$ untuk $i = 0, 1, 2, \cdots, n$. Untuk itu substitusikan pada \ref{pers:PoliPhi} berturut-turut nilai $x_0,x_1,\cdots,x_n$ untuk $x$, dan pada saat yang sama nyatakan $\phi(x_i) = y_i$ serta mengingat bahwa $x_1-x_0 = h, x_2-x_0 = 2h, \cdots, x_n-x_o=nh$.
+\begin{equation*}
+\begin{split}
+(x_0, y_0) \rightarrow y_0 =~& a_0\\
+\end{split}
+\end{equation*}
+\begin{equation*}
+\begin{split}
+(x_1, y_1) \rightarrow y_1 =~& a_0 + a_1(x_1 - x_0) = y_0 + a_1h\\
+a_1 =~& (y_1 - y_0)/h = \Delta y_0 / h\\
+\end{split}
+\end{equation*}
+\begin{equation*}
+\begin{split}
+(x_2, y_2) \rightarrow y_2 =~& a_0 + a_1(x_2 - x_0) + a_2(x_2-x_0)(x_2-x_1)\\
+=~& a_0 + 2ha_1 + 2h^2a_2\\
+=~& y_0 + 2(y_1-y_0) + 2h^2a_2\\
+a_2 =~& (y_2-2y_1+y_0)/(2h^2) = \Delta^2y_0/(2h^2)\\
+\end{split}
+\end{equation*}
+\begin{equation*}
+\begin{split}
+(x_3, y_3) \rightarrow y_3 =~& a_0 + a_1(x_3-x_0) + a_2(x_3-x_0)(x_3-x_1) +\\
+&a_3(x_3-x_0)(x_3-x_1)(x_3-x_2)\\
+=~& a_0 + 3ha_1 + 3\cdot2h^2a_2 + 3\cdot2\cdot1 h^3a_3\\
+=~& y_0 + 3(y_1-y_0) + 3(y_2-2y_1+y_0) + 3!h^3a_3\\
+a_3 =~& (y_3 - 3y_2 + 3y_1 - y_0)/(3!h^3) = \Delta^3y_0/(3!h^3)\\
+\end{split}
+\end{equation*}
+\begin{equation*}
+\begin{split}
+(x_4,y_4) \rightarrow y_4 =~& a_0 + a_1(x_4-x_0) + a_2(x_4-x_0)(x_4-x_1) +\\
+&a_3(x_4-x_0)(x_4-x_1)(x_4-x_2) +\\
+&a_4(x_4-x_0)(x_4-x_1)(x_4-x_2)(x_4-x_3)\\
+=~&a_0 + 4ha_1 + 4\cdot3h^2a_2 + 4\cdot3\cdot2h^3a_3 + 4\cdot3\cdot2\cdot1h^4a_4\\
+=~&y_0 +4(y_1-y_0) + 6(y_2-2y_1+y_0) + 4(y_3-3y_2+3y_1-y_0) +\\
+& 4!h^4a_4\\
+a_4 =~& (y_4 - 4y_3 + 6y_2 - 4y_1 + y_0)/(4!h^4) = \Delta^4y_0/(4!h^4)
+\end{split}
+\end{equation*}
+
+Jadi secara umum kita dapatkan
+
+\begin{equation}\label{pers:AlphaPoliPhi}
+a_n = \Delta^n y_0 / (n!h^n),~~~n = 0,1,2,\cdots
+\end{equation}
+
+Dengan mensubstitusikan persamaan \ref{pers:AlphaPoliPhi} ke \ref{pers:PoliPhi} maka kita dapatkan
+
+\begin{equation}\label{pers:NewtonInterpolasiMaju}
+\begin{split}
+\phi(x) =~& y_0 + \frac{\Delta y_0}{h}(x-x_0) + \frac{\Delta^2y_0}{2!h^2}(x-x_0)(x-x_1) +\\
+&\frac{\Delta^3 y_0}{3!h^3}(x-x_0)(x-x_1)(x-x_2) +\\
+&\frac{\Delta^4 y_0}{4!h^4}(x-x_0)(x-x_1)(x-x_2)(x-x_3) + \cdots +\\
+&\frac{\Delta^n y_0}{n!h^n}(x-x_0)(x-x_1)(x-x_2)(x-x_3) \cdots (x-x_{n-1})
+\end{split}
+\end{equation}
+
+Ini adalah rumus Newton untuk interpolasi maju, yang ditulis dalam $x$. Rumus tersebut dapat disederhanakan dengan mengubah variabel. Untuk itu persamaan \ref{pers:NewtonInterpolasiMaju} kita tulis sebagai
+
+\begin{equation}\label{pers:NewtonInterpolasiMajuSederhana}
+\begin{split}
+\phi(x) =~& y_0 + \Delta y_0\left(\frac{x-x_0}{h}\right) + \frac{\Delta^2y_0}{2!}\left(\frac{x-x_0}{h}\right)\left(\frac{x-x_1}{h}\right) +\\
+&\frac{\Delta^3y_0}{3!}\left(\frac{x-x_0}{h}\right)\left(\frac{x-x_1}{h}\right)\left(\frac{x-x_2}{h}\right) +\\
+&\frac{\Delta^4y_0}{4!}\left(\frac{x-x_0}{h}\right)\left(\frac{x-x_1}{h}\right)\left(\frac{x-x_2}{h}\right)\left(\frac{x-x_3}{h}\right) + \cdots +\\
+&\frac{\Delta^ny_0}{n!}\left(\frac{x-x_0}{h}\right)\left(\frac{x-x_1}{h}\right)\left(\frac{x-x_2}{h}\right)\left(\frac{x-x_3}{h}\right) \cdots \left(\frac{x-x_{n-1}}{h}\right)\\
+\end{split}
+\end{equation}
+
+Sekarang misalkan $(x-x_0)/h = u$ atau $x=x_0+hu$. Karena $x_n=x_0+nh$ maka kita dapatkan
+
+\begin{equation*}
+\begin{split}
+\frac{x-x_1}{h} =~& \frac{x-x_0-h}{h} = \frac{x-x_0}{h} - 1 = u - 1\\
+\frac{x-x_2}{h} =~& \frac{x-x_0-2h}{h} = \frac{x-x_0}{h} - 2 = u - 2\\
+&\vdots\\
+\frac{x-x_{n-1}}{h} =~& \frac{x-x_0-(n-1)h}{h} = \frac{x-x_0}{h} - (n-1) = u -n + 1
+\end{split}
+\end{equation*}
+
+Dengan mensubstitusikan nilai-nilai ini pada persamaan \ref{pers:NewtonInterpolasiMajuSederhana}, maka kita dapatkan bentuk yang lebih sederhana
+
+\begin{equation}\label{pers:NewtonInterpolasiMajuLebihSederhana}
+\begin{split}
+\phi(x) =~& \phi(x_0 + hu) = \\
+& y_0 + u\Delta y_0 + \frac{u(u-1)}{2!}\Delta^2y_0 + \frac{u(u-1)(u-2)}{3!}\Delta^3y_0 +\\
+& \frac{u(u-1)(u-2)(u-3)}{4!}\Delta^4y_0 + \cdots +\\
+& \frac{u(u-1)(u-2)(u-3) \cdots (u-n+1)}{n!}\Delta^n y_0
+\end{split}
+\end{equation}
+
+Bentuk ini yang sering dipakai. Terlihat bahwa koefisien $\Delta$ merupakan koefisien binomium. Penamaan rumus interpolasi maju, karena adanya kenyataan bahwa nilai fungsi pada tabel dari $y_0$ menuju ke arah kanan (maju dari $y_0$). Oleh karena itu rumus ini dipakai untuk menginterpolasi nilai $y$ di dekat awal tabel maupun untuk mengekstrapolasi nilai yang $y$ sedikit sebelum $y_o$. Perhatikan skema berikut
+
+\begin{align*}
+& & \textit{maju}&\rightarrow & &\\
+\leftarrow\textit{ekstrapolasi}~~~~& & y_0 ~~~~ y_1 ~~~~ y_2 ~~&~~ y_3 ~~~~ y_4 ~~~~ \cdots ~~~~ y_n & &~~~~\textit{ekstrapolasi}\rightarrow\\
+& & \leftarrow&\textit{mundur} & &\\
+\end{align*}
+
+Dengan demikian maka $\Delta^n$ berkenaan dengan interpolasi maju dan sebaliknya $\Delta_n$ berkenaan dengan interpolasi mundur seperti yang akan diterangkan berikut ini.
+
+\section{Rumus Newton untuk interpolasi mundur}
+Pada persamaan \ref{pers:NewtonInterpolasiMajuLebihSederhana} tidak dapat dipergunakan untuk mengekstrapolasi nilai $y$ di dekat akhir tabel. Untuk mendapatkan rumus interpolasi yang memenuhi kebutuhan ini kita nyatakan $\phi(x)$ sebagai
+
+\begin{equation}\label{PhiNewtonMundur}
+\begin{split}
+\phi(x) =~& a_0 + a_1(x-x_n) + a_2(x-x_n)(x-x_{n-1})+\\
+&a_3(x-x_n)(x-x_{n-1})(x-x_{n-2})+\\
+&a_4(x-x_n)(x-x_{n-1})(x-x_{n-2})(x-x_{n-3})+\cdots+\\
+&a_n(x-x_n)(x-x_{n-1})(x-x_{n-2})(x-x_{n-3})\cdots(x-x_1)
+\end{split}
+\end{equation}
+Kita tentukan $a_0, a_1, \cdots, a_n$ sedemikian hingga $\phi(x_n) = y_n, \phi(x_{n-1}) = y_{n-1}$ dan seterusnya. Dengan demikian dari persamaan \ref{PhiNewtonMundur} kita dapatkan
+\begin{equation*}
+\begin{split}
+(x_n, y_n) \rightarrow y_n =~& a_0\\
+\end{split}
+\end{equation*}
+\begin{equation*}
+\begin{split}
+(x_{n-1}, y_{n-1}) \rightarrow y_{n-1} =~& a_0 + a_1(x_{n-1} - x_n) = y_n + a_1h\\
+a_1 =~& (y_n - y_{n-1})/h = \Delta_1 y_n / h\\
+\end{split}
+\end{equation*}
+\begin{equation*}
+\begin{split}
+(x_{n-2}, y_{n-2}) \rightarrow y_{n-2} =~& a_0 + a_1(x_{n-2} - x_n) + a_2(x_{n-2}-x_n)(x_{n-2}-x_{n-1})\\
+=~& y_n + a_1(-2h) + a_2(-2h)(-h)\\
+=~& y_n - 2(y_n - y_{n-1}) + 2h^2a_2\\
+a_2 =~& (y_n-2y_{n-1}+y_{n-2})/(2h^2) = \Delta_2y_n/(2h^2)\\
+\end{split}
+\end{equation*}
+\begin{equation*}
+\begin{split}
+(x_{n-3}, y_{n-3}) \rightarrow y_{n-3} =~& a_0 + a_1(-3h) + a_2(-3h)(-2h) + a_3(-3h)(-2h)(-h)\\
+=~& y_n - 3(y_n-y_{n-1}) + 3(y_n-2y_{n-1}+y_{n-2}) - 3!h^3a_3\\
+a_3 =~& (y_n - 3y_{n-1} + 3y_{n-2} - y_{n-3})/(3!h^3) = \Delta_3y_n/(3!h^3)\\
+\end{split}
+\end{equation*}
+
+Jadi secara umum kita peroleh
+\begin{equation}\label{pers:NewtonMundurUmum}
+a_n = \Delta_n y_n/(n!h^n)
+\end{equation}
+
+Substitusi persamaan \ref{pers:NewtonMundurUmum} ke \ref{PhiNewtonMundur} menghasilkan
+
+\begin{equation}
+\begin{split}\label{NewtonInterpolasiMundur}
+\phi(x) =~& y_n + \frac{\Delta_1 y_n}{h}(x-x_n) + \frac{\Delta_n y_n}{2h^2}(x-x_n)(x-x_{n-1}) +\\
+& \frac{\Delta_3 y_n}{3!h^3}(x-x_n)(x-x_{n-1})(x-x_{n-2}) +\\
+& \frac{\Delta_4 y_n}{4!h^4}(x-x_n)(x-x_{n-1})(x-x_{n-2})(x-x_{n-3}) + \cdots +\\
+& \frac{\Delta_n y_n}{n!h^n}(x-x_n)(x-x_{n-1})(x-x_{n-2})\cdots(x-x_1)\\
+\end{split}
+\end{equation}
+
+Ini adalah rumus Newton untuk interpolasi mundur, yang dinyatakan dalam $x$. Rumus ini dapat disederhanakan seperti pada rumus untuk interpolasi maju. Jadi pertama kali kita tulis \ref{NewtonInterpolasiMundur} sebagai
+
+\begin{equation}
+\begin{split}\label{pers:NewtonMundurSederhana}
+\phi(x) =~& y_n + \Delta_1 y_n \left(\frac{x-x_n}{h}\right)+\frac{\Delta_2 y_n}{2!}\left(\frac{x-x_n}{h}\right)\left(\frac{x-x_{n-1}}{h}\right)+\\
+& \frac{\Delta_3 y_n}{3!}\left(\frac{x-x_n}{h}\right)\left(\frac{x-x_{n-1}}{h}\right)\left(\frac{x-x_{n-2}}{h}\right)+\cdots+\\
+& \frac{\Delta_n y_n}{n!}\left(\frac{x-x_n}{h}\right)\left(\frac{x-x_{n-1}}{h}\right)\left(\frac{x-x_{n-2}}{h}\right)\cdots\left(\frac{x-x_1}{h}\right)
+\end{split}
+\end{equation}
+
+Sekarang substitusi $u = (x-x_n)/h$ pada persamaan \ref{pers:NewtonMundurSederhana} dengan mengingat bahwa $x_{n-1} = x_n-h$, $x_{n-2} = x_n-2h$ dan seterusnya. Tapi sebelumnya kita nyatakan dulu,
+
+\begin{equation*}
+\begin{split}
+\frac{x-x_{n-1}}{h} =~& \frac{x-x_n + h}{h} = \frac{x-x_n}{h} + 1 = u + 1\\
+\frac{x-x_{n-2}}{h} =~& \frac{x-x_n + 2h}{h} = \frac{x-x_n}{h} + 2 = u + 2\\
+&\vdots\\
+\frac{x-x_1}{h} =~& \frac{x-x_n + (n-1)h}{h} = \frac{x-x_n}{h} + (n-1) = u + (n-1)\\
+\end{split}
+\end{equation*}
+
+Dengan demikian maka persamaan \ref{pers:NewtonMundurSederhana} menjadi
+
+\begin{equation}
+\begin{split}\label{pers:NewtonMundurUSederhana}
+\phi(x) =~& \phi(x_n + hu) =\\
+& y_n + u\Delta_1 y_n + \frac{u(u+1)}{2!}\Delta_2 y_n + \frac{u(u+1)(u+2)}{3!}\Delta_3 y_n+\\
+& \frac{u(u+1)(u+2)(u+3)}{4!}\Delta_4 y_n + \cdots +\\
+& \frac{u(u+1)(u+2)(u+3)\cdots(u+n-1)}{n!}\Delta_n y_n
+\end{split}
+\end{equation}
+
+\section{Ketelitian rumus Newton untuk interpolasi maju}
+Dalam kalkulus kita mengenal teorema Rolle yang berbunyi sebagai berikut: Jika $f(x)$ kontinu dalam interval $a \leq x \leq b$ dan dapat didifferensialkan dalam interval $a < x < b$ dan bila $f(a) = f(b) = 0$, maka terdapat titik $\xi$ dalam interval $a < x < b$ sedemikian hingga $f'(\xi) = 0$
+
+Untuk menentukan ketelitian rumus Newton untuk interpolasi maju, maka kita tulis sembarang fungsi yang memenuhi teorema Rolle yaitu
+
+\begin{equation}\label{pers:FungsiSembarangRolle}
+F(z) = f(z) - \phi(z) - \{f(x) - \phi(x)\} \frac{(z-x_0)(z-x_1)\cdots(z-x_n)}{(x-x_0)(x-x_1)\cdots(x-x_n)}
+\end{equation}
+
+dengan $f(x)$ sebagai fungsi yang tertentu, $\phi(x)$ sebagai rumus interpolasi polinomial, dan $z$ variabel real. Kita anggap bahwa $f(x)$ kontinu dan memiliki derivatif kontinu untuk semua orde dalam interval dari $x_0$ hingga $x_n$.
+
+Fungsi $F(z)$ menurut persamaan \ref{pers:FungsiSembarangRolle} bernilai nol untuk $(n+2)$ nilai $z = x, x_0, x_1,\cdots x_n$; dan karena $f(x)$ kontinu serta memiliki derivatif kotinu untuk semua orde, maka hal yang sama juga berlaku bagi $f(z)$ dan oleh karena itu juga bagi $F(z)$. Dengan demikian maka $F(z)$ memenuhi teorema Rolle. Oleh karena itu $F'(z)=0$ sedikitnya sekali antara dua harga nol $F(z)$ yang berurutan. Sehingga dalam interval dari $x_0$ hingga $x_n$, $F'(z)=0$ sebanyak $(n+1)$ kali, dan seterusnya. Oleh karena itu $F^{(n+1)}(z)=0$ sedikitnya sekali pada suatu titik dengan absis $\xi$.
+
+Karena $\phi(z)$ suatu polinomial berderajat $n$, maka $\phi^{(n+1)}(z)=0$. Lagi pula karena ekspresi $(z-x_0)(z-x_1)(x-x_2)\cdots(x-x_n)$ merupakan polinomial berderajat $n+1$, maka derivatif ke $(n+1)$ nya sama dengan derivatif ke $(n+1)$ dari $z^{n+1}$ yaitu $(n+1)!$. Dengan demikian differensiasi persamaan \ref{pers:FungsiSembarangRolle} sebanyak $(n+1)$ kali terhadap $z$ akan menghasilkan
+
+\begin{equation}\label{pers:FungsiRolleNTrhdpZ}
+F^{(n+1)}(z) = f^{(n+1)}(z) - 0 - \left\{ f(x) - \phi(x) \right\} \frac{(n+1)!}{(x-x_0)(x-x_1)\cdots(x-x_n)}
+\end{equation}
+
+Tapi telah diuraikan di atas, bahwa $F^{(n+1)}(z) = 0$ pada suatu titik $z = \xi$, maka persamaan \ref{pers:FungsiRolleNTrhdpZ} menjadi
+
+\begin{equation}\label{pers:FungsiRolleXi}
+\begin{split}
+0 =~& f^{(n+1)}(\xi) - \left\{ f(x) - \phi(x) \right\}\frac{(n+1)!}{(x-x_0)(x-x_1)\cdots(x-x_n)}\\
+f(x) - \phi(x) =~& \frac{f^{(n+1)(\xi)}}{(n+1)!}(x-x_0)(x-x_1)\cdots(x-x_n)
+\end{split}
+\end{equation}
+
+Dalam hal ini $f(x) - \phi(x)$ merupakan kesalahan dan kita beri notasi $R_n$, sehingga persamaan \ref{pers:FungsiRolleXi} menjadi
+
+\begin{equation}\label{pers:ErrorInterpolasiMaju}
+R_n = \frac{f^{(n+1)}(\xi)}{(n+1)!}(x-x_0)(x-x_1)\cdots(x-x_n)
+\end{equation}
+
+dengan $\xi$ merupakan nilai $x$ antara $x_0$ dan $x_n$. Inilah ketelitian rumus Newton untuk interpolasi maju. Kita dapat menyatakan persamaan \ref{pers:ErrorInterpolasiMaju} dalam variabel $u$ dengan mengingat bahwa $u = (x-x_0)/h$. Jadi kita punyai
+
+\begin{equation*}
+\begin{split}
+x-x_0 =~& hu\\
+x-x_1 =~& x-(x_0 + h) = x-x_0-h = h(u-1)\\
+x-x_2 =~& x-(x_0 + 2h) = x-x_0-2h = h(u-2)\\
+& \vdots\\
+x-x_n =~& x-(x_0 + nh) = x-x_0-nh = h(u-n)
+\end{split}
+\end{equation*}
+
+Dengan mensubstitusikan nilai-nilai ini ke persamaan \ref{pers:ErrorInterpolasiMaju} maka kita dapatkan
+
+\begin{equation}\label{pers:ErrorInterpolasiMajuU}
+R_n = \frac{h^{n+1}f^{(n+1)}(\xi)}{(n+1)!}u(u-1)(u-2)\cdots(u-n)
+\end{equation}
+
+Jika fungsi $f(x)$ tidak diketahui, maka yang terbaik yang dapat kita lakukan adalah mengganti $f^{n+1}(\xi)$ dengan nilainya dalam bentuk beda. Hubungan antara beda ke-$n$ dan derivatif ke-$n$ dinyatakan sebagai berikut.
+
+\begin{equation}\label{pers:ErrorInterpolasiMajuBeda}
+\Delta^n f(x) = (\Delta x)^n f^{(n)}(x+\theta n \Delta x),~~0<\phi<1
+\end{equation}
+
+Dengan mengambil $x=x_0$ dan $\Delta x = h$, maka dari persamaan \ref{pers:ErrorInterpolasiMajuBeda} didapat
+
+\begin{equation}\label{pers:ErrorInterpolasiMajuBeda2}
+f^{(n)}(x_0 + \theta nh) = \frac{\Delta^n f(x_0)}{h^n}
+\end{equation}
+
+Sekarang karena $x_0 + \theta nh$ dan $\xi$ adalah nilai $x$ pada titik-titik dalam interval interpolasi, yakni antara $x_0$ dan $x_n$, maka untuk keperluan praktis kita bisa mengambil $\xi = x_0 + \theta nh$. Dengan demikian \ref{pers:ErrorInterpolasiMajuBeda2} menjadi
+
+\begin{equation}
+f^{(n)}(\xi) = \frac{\Delta^nf(x_0)}{h^n}
+\end{equation}
+
+Oleh karena itu kita dapatkan
+
+\begin{equation}\label{pers:ErrorInterpolasiMajuBeda2Praktis+1}
+f^{(n+1)}(\xi) = \frac{\Delta^{n+1}f(x_0)}{h^{n+1}}
+\end{equation}
+
+Dengan mensubstitusikan persamaan \ref{pers:ErrorInterpolasiMajuBeda2Praktis+1} ke persamaan \ref{pers:ErrorInterpolasiMajuU}, maka kita dapatkan
+
+\begin{equation}\label{pers:ErrorInterpolasiMajuUPraktis}
+R_n = \frac{\Delta^{n+1}y_0}{(n+1)!} u(u-1)(u-2)\cdots(u-n)
+\end{equation}
+
+\section{Ketelitian rumus Newton untuk interpolasi mundur}
+Seperti persamaan \ref{pers:FungsiSembarangRolle} kita tuliskan
+
+\begin{equation}
+F(z) = f(z) - \phi(z) - \left\{f(x)-\phi(x)\right\}\frac{(z-x_n)(z-x_{n-1})\cdots(z-x_0)}{(x-x_n)(x-x_{n-1})\cdots(x-x_0)}
+\end{equation}
+
+Dengan cara yang sama kita peroleh
+
+\begin{equation}\label{pers:ErrorInterpolasiMundur}
+R_n = \frac{f^{(n+1)}(\xi)}{(n+1)!}(x-x_n)(x-x_{n-1})\cdots(x-x_0)
+\end{equation}
+
+Selanjutnya dengan mengingat bahwa $(x-x_n)/h = u$, maka kita peroleh
+
+\begin{equation*}
+\begin{split}
+x - x_n =~& hu\\
+x - x_{n-1} =~& x-(x_n-h) = h(u+1)\\
+x - x_{n-2} =~& x-(x_n-2h) = h(u+2)\\
+&\vdots\\
+x - x_0 =~& x-(x_n-nh) = h(u+n)
+\end{split}
+\end{equation*}
+
+Dengan mensubstitusikan nilai-nilai ini pada persamaan \ref{pers:ErrorInterpolasiMundur} maka kita memperoleh
+
+\begin{equation}\label{pers:ErrorInterpolasiMundurU}
+R_n = \frac{h^{n+1}f^{(n+1)}(\xi)}{(n+1)!}u(u+1)(u+2)\cdots(u+n)
+\end{equation}
+
+Jika $f(x)$ tidak diketahui, maka karena $\Delta^{n+1} y_0 = \Delta_{n+1} y_n$ kita ganti $f^{(n+1)}(\xi)$ dengan $\Delta_{n+1} y_n / h^{n+1}$ seperti halnya persamaan \ref{pers:ErrorInterpolasiMajuBeda2Praktis+1}. Dengan demikian persamaan \ref{pers:ErrorInterpolasiMundurU} menjadi
+
+\begin{equation}
+R_n = \frac{\Delta_{n+1} y_n}{(n+1)!}u(u+1)(u+2)\cdots(u+n)
+\end{equation}
+
+\begin{exmp}\end{exmp}
+Diketahui tabel berikut
+
+\begin{table}[!htbp]
+\centering
+\begin{tabular}{@{}|c|*3c|@{}}
+\hline
+\multicolumn{1}{|c|}{\bf{x}} & \multicolumn{3}{c|}{\bf{$y = log(x)$}}\\
+\hline
+3.141 & 0.4970 & 679 & 364\\
+3.142 & 0.4972 & 061 & 807\\
+3.143 & 0.4973 & 443 & 810\\
+3.144 & 0.4974 & 825 & 374\\
+3.145 & 0.4976 & 206 & 498\\
+\hline
+\end{tabular}
+\end{table}
+
+Tentukan:
+\begin{enumerate}
+\item $log~3.1413$
+\item $log~3.1410$
+\item $log~3.1417$
+\item $log~3.1416$
+\end{enumerate}
+
+Tentukan pula ketelitiannya.
+
+{\bf Jawab}
+
+Untuk menjawab bagian (a) dan (b) kita gunakan rumus Newton untuk interpolasi maju. Khusus bagian (b), karena nilai $x$-nya berada di luar tabel, maka prosesnya dinamakan ekstrapolasi. Untuk (a) dan (b) kita buat tabel berikut ($x$ dan $y$ tidak ikut dicantumkan).
+
+\begin{table}[!htbp]
+\centering
+\begin{tabular}{@{}|c|c|c|c|c|@{}}
+\hline
+$x$ & $y$ & $\Delta y$ & $\Delta^2y$ & $\Delta^3y$\\
+\hline
+$x_0$ & $y_0$ & & &\\
+ & & $1382443$ & &\\
+$x_1$ & $y_1$ & & $-440$ & \\
+ & & $1382003$ & & $1$\\
+$x_2$ & $y_2$ & & $-439$ & \\
+ & & $1381564$ & & $-1$\\
+$x_3$ & $y_3$ & & $-440$ & \\
+ & & $1381124$ & &\\
+$x_4$ & $y_4$ & & &\\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{enumerate}
+\item Disini $x=3,1413$ dan $h = 0.001$, sehingga $u = (x-x_0)/h = 0.3$. Dari persamaan \ref{pers:NewtonInterpolasiMajuLebihSederhana} kita dapatkan
+	\begin{equation*}
+	\begin{split}
+	\phi(x) =~& y_0 + u\Delta y_0 + u(u-1)\Delta^2y_0/2! + u(u-1)(u-2)\Delta^3y_0/3!\\
+	& 0.4970679364 + (0.3)(1382443\cdot10^{-10}) +\\
+	& (0.3)(-0.7)(-440\cdot10^{-10})/2!+\\
+	& (0.3)(-0.7)(-1.7)(10^{-10})/3!\\
+	=~& 0.497109413
+	\end{split}
+	\end{equation*}
+
+	Menurut persamaan \ref{pers:ErrorInterpolasiMajuU}, maka ketelitiannya dapat dihitung sebagai berikut. Karena kita berhenti pada beda ketiga, maka $n=3$.
+
+	\begin{equation*}
+	\begin{split}
+	f(x) =~& log(x)\\
+	f'(x) =~& x^{-1}/ln 10\\
+	f''(x) =~& -x^{-2}/ln 10\\
+	f'''(x) =~& 2x^{-3}/ln 10\\
+	f^{(4)}(x) =~& -6x^{-4}/ln 10\\
+	\end{split}
+	\end{equation*}
+
+	Kita ambil maksimum $f^{(4)}(x)$, yaitu untuk $x=3.141$. Jadi
+
+	\begin{equation*}
+	\begin{split}
+	R_3 =~& \frac{h^4f^{4}(\xi)}{4!} u(u-1)(u-2)(u-3)\\
+		=~& \frac{(0.001)^4(-6\cdot3.141^{-4}/ln 10)}{4!}(0.3)(-0.7)(-1.7)(-2.7)\\
+		=~& 1.075188361\cdot10^{-15}
+	\end{split}
+	\end{equation*}
+
+	Ini berarti bahwa hasil yang diperoleh akan teliti hingga 14 desimal. Bila kita gunakan \ref{pers:ErrorInterpolasiMajuUPraktis}, maka kita dapatkan 
+
+	\begin{equation*}
+	\begin{split}
+	R_3 =~& \frac{\Delta^4 y_0}{4!}u(u-1)(u-2)(u-3)\\
+	=~& \frac{(-2\cdot10^{-10})}{4!}(0.3)(-0.7)(-1.7)(-2.7)\\
+	=~& 8.0325 \cdot 10^{-12}
+	\end{split}
+	\end{equation*}
+
+	Hasilnya ternyata lebih besar, tapi tetap menjamin bahwa $log~3.1413 = 0.497109413$ teliti hingga 9 desimal.
+
+\item Ini merupakan ekstrapolasi. Dalam hal ini $x = 3.140$, sehingga $u = (x-x_0)/h = (3.140 - 3.141)/0.001 = -1$. Dengan demikian maka
+
+	\begin{equation*}
+	\begin{split}
+	\phi(x) =~& y_0 + u\Delta y_0 + u(u-1)\Delta^2y_0/2! + u(u-1)(u-2)\Delta^3y_0/3!\\
+	=~& 0.4970679364 + (-1)(1382443\cdot10^{-10})+\\
+	& (-1)(-2)(-440\cdot10^{-10})/2!+(-1)(-2)(-3)(10^{-10})/3!\\
+	=~& 0.496929647
+	\end{split}
+	\end{equation*}
+
+	Ketelitiannya menurut \ref{pers:ErrorInterpolasiMajuU} adalah
+
+	\begin{equation*}
+	\begin{split}
+	R_3 =~& \frac{h^4f^{(4)}(\xi)}{4!} u(u-1)(u-2)(u-3)\\
+	=~& \frac{(0.001)^4(-6\cdot3.140^{-4}/ln 10)}{4!}(-1)(-2)(-3)(-4)\\
+	=~& 2.680507146\cdot10^{-14}
+	\end{split}
+	\end{equation*}
+
+	Bila dihitung dengan \ref{pers:ErrorInterpolasiMajuUPraktis} maka kita dapatkan
+
+	\begin{equation*}
+	\begin{split}
+	R_3 =~& \frac{\Delta^4 y_0}{4!} u(u-1)(u-2)(u-3)\\
+	=~& \frac{-2\cdot10^{-10}}{4!}\cdot(-1)(-2)(-3)(-4)\\
+	=~& 2\cdot10^{-10}
+	\end{split}
+	\end{equation*}
+
+	Jadi hasil yang diperoleh teliti hingga $9$ desimal. Perlu diperhatikan bahwa rumus yang benar adalah \ref{pers:ErrorInterpolasiMajuU}, sedangkan \ref{pers:ErrorInterpolasiMajuUPraktis} merupakan pendekatannya dan dipakai bila rumus $f(x)$ tidak diketahui. Bila $h$ semakin kecil, maka \ref{pers:ErrorInterpolasiMajuUPraktis} makin mendekati \ref{pers:ErrorInterpolasiMajuU}.
+
+\item Dalam hal ini kita gunakan rumus Newton untuk interpolasi mundur. Untuk itu diperlukan tabel berikut.
+
+	\begin{table}[!htbp]
+	\centering
+	\begin{tabular}{@{}|c|c|c|c|c|@{}}
+	\hline
+	$x$ & $y$ & $\Delta_1 y$ & $\Delta_2y$ & $\Delta_3y$\\
+	\hline
+	$x_0$ & $y_0$ & & &\\
+	$x_1$ & $y_1$ & $138245$ & & \\
+	$x_2$ & $y_2$ & $138200$ & $-45$& \\
+	$x_3$ & $y_3$ & $138156$ & $-44$ & $1$\\
+	$x_4$ & $y_4$ & $138113$ & $-43$ & $1$\\
+	\hline
+	\end{tabular}
+	\end{table}
+
+	Dalam hal ini $x = 3.1447$, sehingga $u=(x-x_n)/h=(3.1447-3.145)/0.001=-0.3$. Maka dari persamaan \ref{pers:NewtonMundurUSederhana} kita dapatkan
+
+	\begin{equation*}
+	\begin{split}
+	\phi(x) =~& y_n + u\Delta_1y_n + u(u+1)\Delta_2y_n/2! + u(u+1)(u+2)\Delta_3y_n/3!\\
+	=~& 0.497620650 + (-0.3)(138113\cdot10^{-9})+\\
+	&(-0.3)(0.7)(-43\cdot10^{-9})/2! + (-0.3)(0.7)(1.7)(10^{-9})/3!\\
+	=~& 0.497579220
+	\end{split}
+	\end{equation*}
+
+	Kesalahan menurut persamaan \ref{pers:ErrorInterpolasiMundurU} sebanding dengan $\Delta_4 y_n = \Delta_4 y_4 = 0$. Jadi hasil yang didapat teliti hingga $9$ desimal.
+\item Ini adalah ekstrapolasi, dengan $x = 3.146$ sehingga $u = (x-x_n)/h = (3.146 - 3.145)/0.001 = 1$. Dengan demikian dari persamaan \ref{pers:NewtonMundurUSederhana} diperoleh
+
+	\begin{equation*}
+	\begin{split}
+	\xi(x) =~& y_n + u\Delta_1y_n + u(u+1)\Delta_2 y_n/2! + u(u+1)(u+2)\Delta_3 y_n/3!\\
+	=~& 0.497620650 + 138113\cdot10^{-9} + 1\cdot2\cdot(-43\cdot10^{-9})/2! +\\
+	&1\cdot2\cdot3\cdot10^{-9}/3! = 0.497758721
+	\end{split}
+	\end{equation*}
+\end{enumerate}
+
+\section{Fungsi faktorial}
+Secara umum fungsi faktorial didefinisikan sebagai
+
+\begin{equation}\label{pers:FaktorialUmum}
+\{f(x)\}^{(m)} = f(x)f(x-h)f(x-2h)\cdots f\{x-(m-1)h\},~m = 1,2,\cdots
+\end{equation}
+
+Jika $f(x)=x$ maka \ref{pers:FaktorialUmum} menjadi
+
+\begin{equation}\label{pers:FaktorialUmumX}
+x^{(m)} = x(x-h)(x-2h)\cdots\{x-(m-1)h\},~m=1,2,3,\cdots
+\end{equation}
+
+Dalam keadaan khusus, jika $x=m$ dan $h=1$, maka \ref{pers:FaktorialUmumX} menjadi
+
+\begin{equation}\label{pers:FaktorialUmumM}
+m^{(m)} = m(m-1)(m-2)\cdots3\cdot2\cdot1=m!
+\end{equation}
+
+yang merupakan faktorial $m$. Persamaan \ref{pers:FaktorialUmumX} mempunyai sifat
+
+\begin{equation}\label{pers:SifatFaktorialUmumX}
+\boxed{\frac{\Delta x^{(m)}}{\Delta x} = mx^{(m-1)}},~ m=1,2,3,\cdots
+\end{equation}
+
+\textbf{Bukti}
+
+Persamaan \ref{pers:SifatFaktorialUmumX} dapat ditulis sebagai
+
+\begin{equation}\label{pers:SifatFaktorialUmumX2}
+	\Delta x^{(m)} = mx^{(m-1)}h, ~\text{dengan} ~h = \Delta x
+\end{equation}
+
+Seperti halnya turunan maka juga didefinisikan bahwa
+
+\begin{equation}\label{pers:TurunanSifatFaktorialUmumX2}
+\frac{\Delta f(x)}{\Delta x} = \frac{f(x+h)-f(x)}{h},~h=\Delta x
+\end{equation}
+
+Dengan demikian, maka kita dapatkan dari \ref{pers:TurunanSifatFaktorialUmumX2},
+
+\begin{equation*}
+\begin{split}
+\Delta x^{(m)} =~& (x+h)^{(m)} - x^{(m)}\\
+=~&(x+h)(x)(x-h)(x-2h)\cdots\{x-(m-2)h\}-\\
+&(x)(x-h)(x-2h)\cdots\{x-(m-1)h\}\\
+=~&(x)(x-h)(x-2h)\cdots\{x-(m-2)h\}[(x+h)-\{x-(m-1)h\}]\\
+=~&x^{(m-1)}\cdot\\
+=~& mx^{(m-1)}~~~\text{terbukti}
+\end{split}
+\end{equation*}
+
+
+\begin{equation}\label{pers:X0=1}
+\boxed{x^{(0)} = 1}
+\end{equation}
+\textbf{Bukti}
+
+Jika $m=1$, maka persamaan \ref{pers:SifatFaktorialUmumX} menjadi
+
+\begin{equation}\label{pers:SifatFaktorialUmumXM1}
+\Delta x^{(1)} = x^{(0)}\Delta x = x^{(0)}h
+\end{equation}
+
+Dari persamaan \ref{pers:TurunanSifatFaktorialUmumX2} didapat
+
+\begin{equation}\label{pers:TurunanSifatFaktorialUmumXM2}
+\Delta x^{(1)} = (x+h)^{(1)} - x^{(1)} = (x+h) - (x) = h
+\end{equation}
+
+Selanjutnya dari \ref{pers:SifatFaktorialUmumXM1} dan \ref{pers:TurunanSifatFaktorialUmumX2} kita peroleh \ref{pers:X0=1}.
+
+
+\begin{equation}\label{pers:TurunanSifatFaktorialUmumFXM2}
+\boxed{\frac{\Delta\{f(x)\}^{(m)}}{\Delta x} = m\{f(x)\}^{(m-1)}\frac{\Delta f(x)}{\Delta x}}, ~~m=1,2,3,\cdots
+\end{equation}
+
+\textbf{Bukti}
+
+Dari \ref{pers:TurunanSifatFaktorialUmumX2} kita dapatkan
+
+\begin{equation*}
+\begin{split}
+\Delta\{f(x)\}^{(m)} =~& \{f(x+h)\}^{(m)} - \{f(x)\}^{(m)}\\
+=~& f(x+h)f(x)f(x-h)\cdots f\{x-(m-2)h\}-\\
+&f(x)f(x-h)f(x-2h)\cdots f\{x-(m-1)h\}\\
+=~& f(x)f(x-h)\cdots f\{x-(m-2)h\}[f(x+h)-f\{x-(m-1)h\}]\\
+=~& \{f(x)\}^{(m-1)}([f(x+h)-f(x)]+[f(x)-f\{x-(m-1)h\}])\\
+=~& \{f(x)\}^{(m-1)}(\Delta f(x) + (m-1)\Delta f(x))\\
+=~& m\{f(x)\}^{(m-1)} \Delta f(x)
+\end{split}
+\end{equation*}
+
+Dengan demikian maka didapat \ref{pers:TurunanSifatFaktorialUmumFXM2}
+
+\begin{equation}\label{pers:FaktorialUmum0}
+\boxed{\{f(x)\}^{(0)} = 1}
+\end{equation}
+
+
+\textbf{Bukti}
+
+Untuk $m = 1$, maka \ref{pers:TurunanSifatFaktorialUmumFXM2} menjadi
+
+\begin{equation}\label{pers:BuktiFaktorialUmum0}
+\Delta \{f(x)\}^{(1)} = \{f(x)\}^{(0)}\Delta f(x)
+\end{equation}
+
+Dari \ref{pers:TurunanSifatFaktorialUmumX2} kita dapatkan
+
+\begin{equation}\label{pers:FaktorialUmumFX1}
+\Delta\{f(x)\}^{(1)} = \{f(x+h)\}^{(1)} - \{f(x)\}^{(1)} = f(x+h) - f(x) = \Delta f(x)
+\end{equation}
+
+Dengan demikian dari \ref{pers:TurunanSifatFaktorialUmumFXM2} dan \ref{pers:FaktorialUmumFX1} kita peroleh \ref{pers:FaktorialUmum0}
+
+Kita dapat mendefinisikan $x^{(-m)}$ untuk $m = 1,2,3, \cdots$ sebagai berikut.
+
+Dari \ref{pers:FaktorialUmumX} kita dapatkan
+
+\begin{equation}
+\begin{split}\label{pers:FaktorialUmumXM+1}
+x^{(m+1)} =~& x(x-h) (x-2h)\cdots\{x-(m-1)h\}(x-mh)\\
+=~& x^{(m)}(x-mh)\\
+\end{split}
+\end{equation}
+
+Untuk $m=-1$, maka \ref{pers:FaktorialUmumXM+1} menjadi
+
+\begin{equation}\label{pers:FaktorialUmumXM+1=0}
+x^{(0)} = x^{(-1)}(x+h) \rightarrow 1 = x^{(-1)}(x+h) \rightarrow x^{(-1)} = \frac{1}{(x+h)}
+\end{equation}
+
+Untuk $m=-2$, maka \ref{pers:FaktorialUmumXM+1} menjadi
+
+\begin{equation}\label{pers:FaktorialUmumXM+1=-1}
+x^{(-1)} = x^{(-2)}(x+2h) \rightarrow \frac{1}{x+h} = x^{(-2)}(x+2h) \rightarrow x^{(-2)} = \frac{1}{(x+h)(x+2h)}
+\end{equation}
+
+Dari \ref{pers:FaktorialUmumXM+1=0} dan \ref{pers:FaktorialUmumXM+1=-1} dapat disimpulkan bahwa secara umum berlaku
+
+\begin{equation}\label{pers:FaktorialUmumX-1}
+\boxed{x^{(-m)} = \frac{1}{(x+h)(x+2h)\cdots (x+mh)};~~m=1,2,3,\cdots}
+\end{equation}
+
+Dalam hal ini berlaku sifat berikut,
+
+\begin{equation}
+\boxed{\frac{\Delta x^{(-m)}}{\Delta x} = -m x^{(-m-1)}},~m=1,2,3,\cdots
+\end{equation}
+
+\textbf{Bukti}
+
+Dari \ref{pers:TurunanSifatFaktorialUmumX2} dan \ref{pers:FaktorialUmumX-1} kita dapatkan
+
+\begin{equation*}
+\begin{split}
+\Delta x^{(-m)} =~& (x+h)^{(-m)} - x^{(-m)}\\
+=~& \frac{1}{(x+2h)(x+3h)\cdots\{x+(m+1)h\}} - \frac{1}{(x+h)(x+2h)\cdots (x+mh)}\\
+=~& \frac{1}{(x+2h)\cdots(x+mh)}\left[\frac{1}{x+(m+1)h}-\frac{1}{x+h}\right]\\
+=~& \frac{x+h - \{x+(m+1)h\}}{(x+h)(x+2h)\cdots(x+mh)\{x+(m+1)h\}}\\
+=~& \frac{-mh}{(x+h)(x+2h)\cdots (x+mh)\left\{x+(m+1)h\right\}}\\
+=~& -mx^{(-m-1)h}\\
+=~& -mx^{(-m-1)}\Delta x~~~\text{(terbukti)}
+\end{split}
+\end{equation*}
+
+
+\begin{equation}\label{pers:FaktorialUmum-M}
+\boxed{\{f(x)\}^{(-m)} = \frac{1}{f(x+h)f(x+2h)\cdots f(x+mh)},~m=1,2,3,\cdots}
+\end{equation}
+
+\textbf{Bukti}
+
+Dari \ref{pers:FaktorialUmum} kita dapatkan
+
+\begin{equation}
+\begin{split}\label{pers:FaktorialUmumM+1}
+\{f(x)\}^{(m+1)} =~& f(x)f(x+h)\cdots f\{x-(m-1)h\}f(x-mh)\\
+=~& \{f(x)\}^{(m)} f(x-mh)
+\end{split}
+\end{equation}
+
+Untuk $m=-1$, maka \ref{pers:FaktorialUmumM+1} menjadi
+
+\begin{equation}\label{pers:FaktorialUmumM+1M-1}
+\{f(x)\}^{(0)} = \{f(x)\}^{(-1)} f(x+h) \rightarrow \{f(x)\}^{(-1)} = \frac{1}{f(x+h)}
+\end{equation}
+
+Untuk $m=-2$, maka \ref{pers:FaktorialUmumM+1} menjadi
+
+\begin{equation}\label{pers:FaktorialUmumM+1M-2}
+\{f(x)\}^{(-1)} = \{f(x)\}^{(-2)} f(x+2h) \rightarrow \{f(x)\}^{(-2)} = \frac{1}{f(x+h)f(x+2h)}
+\end{equation}
+
+Dari \ref{pers:FaktorialUmumM+1M-1} dan \ref{pers:FaktorialUmumM+1M-2} didapat kesimpulan \ref{pers:FaktorialUmum-M}
+
+
+\begin{equation}\label{pers:f(x)^(-m)}
+\boxed{\frac{\Delta \{f(x)\}^{(-m)}}{\Delta x} = -m\{f(x)\}^{(-m-1)}\frac{\Delta f(x)}{\Delta x}, ~m=1,2,3,\cdots}
+\end{equation}
+
+\textbf{Bukti}
+
+Dari \ref{pers:TurunanSifatFaktorialUmumX2} dan \ref{pers:FaktorialUmum-M} kita peroleh
+
+\begin{equation*}
+\begin{split}
+\Delta\{f(x)\}^{(-m)} =~& \{f(x+h)\}^{(-m)} - \{f(x)\}^{(-m)}\\
+=~& \frac{1}{f(x+2h)f(x+3h)\cdots f\{x+(m+1)h\}} \\
+& - \frac{1}{f(x+h)f(x+2h)\cdots f(x+mh)}\\
+=~& \frac{1}{f(x+2h)\cdots f(x+mh)}\left[\frac{1}{f\{x+(m+1)h\}}-\frac{1}{f(x+h)}\right]\\
+=~& \frac{f(x+h)-f\{x+(m+1)h\}}{f(x+h)f(x+2h)\cdots f(x+mh)f\{x+(m+1)h\}}\\
+=~& \left( \left[ f(x+h)-f(x) \right] + \left[ f(x) - f\{x+(m+1)h\}\right] \right)\{f(x)\}^{(-m-1)}\\
+=~& \left(\Delta f(x) - (m-1)\Delta f(x)\right)\{ f(x) \}^{(-m-1)}\\
+=~& -m\{f(x)\}^{(-m-1)}\Delta f(x)~~~\text{(terbukti)}
+\end{split}
+\end{equation*}
+
+\begin{exmp}\end{exmp}
+Untuk $m=1,2,3,\cdots$ buktikan bahwa
+
+\begin{equation}\label{pers:ax+b}
+\boxed{
+\begin{split}
+(ax+b)^{(m)} =~& (ax+b)(ax+b-ah)(ax+b-2ah\cdots)\\
+=~& (ax+b-mah+ah)
+\end{split}
+}
+\end{equation}
+
+\textbf{Bukti}
+
+Dalam hal ini $f(x)=ax+b$, sehingga \ref{pers:FaktorialUmum} menjadi
+
+\begin{equation*}
+\begin{split}
+(ax+b)^{(m)} =~& (ax+b)\{a(x-h)+b\}\{a(x-2h)+b\}\cdots \{a(x-\overline{m-1}h)+b\}\\
+ =~&(ax+b)(ax+b-ah)(ax+b-2ah)\cdots (ax+b-mah+ah)
+\end{split}
+\end{equation*}
+
+\begin{exmp}\end{exmp}
+Untuk $m=1,2,3,\cdots$ buktikan bahwa
+
+\begin{equation}\label{pers:(ax+b)(-m)}
+\boxed{
+(ax+b)^{(-m)} = \frac{1}{(ax+b+ah)(ax+b+2ah)\cdots (ax+b+mah)}
+}
+\end{equation}
+
+\textbf{Bukti}
+
+Dengan $f(x)=ax+b$, maka \ref{pers:FaktorialUmum-M} menjadi
+
+\begin{equation*}
+\begin{split}
+(ax+b)^{(-m)} =~& \frac{1}{\{a(x+h)+b\}\{a(x+2h)+b\}\cdots \{a(x+mh)+b\}}\\
+=~& \frac{1}{(ax+b+ah)(ax+b+2ah)\cdots (ax+b+mah)}~~~\text{(terbukti)}
+\end{split}
+\end{equation*}
+
+\begin{exmp}\end{exmp}
+Nyatakan dalam fungsi faktorial
+\begin{enumerate}
+\item $(2x+5)(2x+7)(2x+9)(2x+11)$
+\item $\frac{1}{(3x-2)(3x+1)(3x+4)(3x+7)(3x+10)}$
+\end{enumerate}
+
+\textbf{Jawab}
+\begin{enumerate}
+\item Kita gunakan \ref{pers:ax+b}; dalam hal ini $m=4$ dan $a=2, b=11, b-ah=9 \rightarrow 11-2h=9 \rightarrow h=1$. Dengan demikian maka $(2x+5)(2x+7)(2x+9)(2x+11) = (2x+7)^{(4)}$
+\item Dalam hal ini kita gunakan \ref{pers:(ax+b)(-m)} dengan $m=5$ dan $a=3$.
+
+\begin{equation*}
+\begin{split}
+b + ah = -2 ~&\rightarrow~ b + 3h = -2\\
+b + 2ah = 1 ~&\rightarrow~ b + 6h = 1\\
+&\Longrightarrow b = -5,~h=1
+\end{split}
+\end{equation*}
+
+Jadi kita dapatkan
+
+\begin{equation*}
+\frac{1}{(3x-2)(3x+1)(3x+4)(3x+7)(3x+10)} ~=~ (3x-5)^{(-5)}
+\end{equation*}
+\end{enumerate}
+
+
+\begin{exmp}\end{exmp}
+Tentukan
+\begin{enumerate}
+\item $\frac{\Delta (5x-2)^{(3)}}{\Delta x}$
+\item $\frac{\Delta (5x-2)^{(-4)}}{\Delta x}$
+\end{enumerate}
+
+\textbf{Jawab}
+
+Dalam hal ini $f(x)=5x-2$, sehingga $\frac{\Delta f(x)}{\Delta x} = \frac{\{(5(x+\Delta x)-2)-(5x-2)\}}{\Delta x} = \frac{5 \Delta x}{\Delta x} = 5$.
+\begin{enumerate}
+\item Kita gunakan \ref{pers:TurunanSifatFaktorialUmumFXM2}, $\frac{\Delta (5x-2)^{(3)}}{\Delta x} = 3(5x-2)^{(2)}\cdot 5 = 15(5x-2)^{(2)}$
+\item Kita gunakan \ref{pers:f(x)^(-m)}, $\frac{\Delta (5x-2)^{(-4)}}{\Delta x} = -4 (5x-2)^{(-5)} \cdot 5 = -20(5x-2)^{(-5)}$
+\end{enumerate}
+
+\section{Beda terbagi}
+Rumus interpolasi yang kita bicarakan di muka hanya dapat dipakai bila nilai fungsi diberikan pada interval berjarak sama untuk variabel bebas atau argumen. Kadang-kadang kurang menguntungkan atau bahkan tidak mungkin untuk mendapatkan nilai fungsi pada nilai-nilai argumennya yang berjarak sama, dan dalam keadaan seperti ini kita perlu mencari rumus interpolasi yang berlaku untuk interval tak berjarak sama. Dalam hal ini terdapat dua rumus yaitu rumus Newton dan rumus Lagrange.
+
+Misalkan $y_0, y_1, y_2, \cdots, y_n$ menyatakan nilai fungsi yang bersesuaian dengan nilai argumen $x_0, x_1, x_2, \cdots, x_n$. Maka beda terbagi $y$ dalam urutan naik didefinisikan sebagai berikut:
+
+Beda terbagi orde pertama:
+
+\begin{equation*}
+\delta(x_1, x_0) = \frac{y_1-y_0}{x_1-x_0}, ~\delta(x_2, x_1) = \frac{y_2-y_1}{x_2-x_1}, ~\delta(x_3,x_2) = \frac{y_3 - y_2}{x_3 - x_2},~ \text{dst.}
+\end{equation*}
+
+Beda terbagi orde kedua:
+
+\begin{equation*}
+\begin{split}
+\delta(x_2, x_1, x_0) =~& \frac{\delta(x_2,x_1)-\delta(x_1,x_0)}{x_2 - x_0}\\
+\delta(x_3, x_2, x_1) =~& \frac{\delta(x_3,x_2)-\delta(x_2,x_1)}{x_3 - x_1}, \text{dst.}
+\end{split}
+\end{equation*}
+
+Beda terbagi orde ketiga:
+
+\begin{equation*}
+\begin{split}
+\delta(x_3, x_2, x_1, x_0) =~& \frac{\delta(x_3,x_2,x_1)-\delta(x_2,x_1,x_0)}{x_3 - x_0}\\
+\delta(x_4, x_3, x_2, x_1) =~& \frac{\delta(x_4,x_3,x_2)-\delta(x_3,x_2,x_1)}{x_4 - x_1}, \text{dst.}
+\end{split}
+\end{equation*}
+
+Beda terbagi orde keempat:
+
+\begin{equation*}
+\delta(x_4,x_3,x_2,x_1,x_0) = \frac{\delta (x_4,x_3,x_2,x_1)-\delta(x_3,x_2,x_1,x_0)}{x_4 - x_0}, \text{dst.}
+\end{equation*}
+
+Bila dinyatakan dalam tabel, maka kita dapatkan
+
+\begin{table}[!htbp]
+\centering
+\caption{Beda terbagi}
+\label{tabel:BedaTerbagi}
+\begin{tabular}{@{}|c|c|c|c|c|c|@{}}
+\hline
+$x$ & $y$ & $\delta^1$ & $\delta^2$ & $\delta^3$ & $\delta^4$\\\hline
+$x_0$ & $y_0$ & & & & \\
+ & & $\delta(x_1,x_0)$ & & & \\
+$x_1$ & $y_1$ & & $\delta(x_2,x_1,x_0)$ & & \\
+ & & $\delta(x_2,x_1)$ & & $\delta(x_3,x_2,x_1,x_0)$ &\\
+$x_2$ & $y_2$ & & $\delta(x_3,x_2,x_1)$ & & $\delta(x_4,x_3,x_2,x_1,x_0)$\\
+ & & $\delta(x_3,x_2)$ & & $\delta(x_4,x_3,x_2,x_1)$ &\\
+$x_3$ & $y_3$ & & $\delta(x_4,x_3,x_2)$ & & $\delta(x_5,x_4,x_3,x_2,x_1)$\\
+ & & $\delta(x_4,x_3)$ & & $\delta(x_5,x_4,x_3,x_2)$ &\\
+$x_4$ & $y_4$ & & $\delta(x_5,x_4,x_3)$ & & $\delta(x_6,x_5,x_4,x_3,x_2)$\\
+ & & $\delta(x_5,x_4)$ & & $\delta(x_6,x_5,x_4,x_3)$ &\\
+$x_5$ & $y_5$ & & $\delta(x_6,x_5,x_4)$ & & \\
+ & & $\delta(x_6,x_5)$ & & & \\
+$x_6$ & $y_6$ & & & & \\\hline
+\end{tabular}
+\end{table}
+
+Beda terbagi merupakan fungsi simetris dari argumennya seperti yang ditunjukkan berikut ini
+
+\begin{equation*}
+\delta(x_1,x_0) = \frac{y_1-y_0}{x_1-x_0} \equiv \frac{y_0 - y_1}{x_0 - x_1} = \delta (x_0, x_1)
+\end{equation*}
+
+Juga berlaku
+
+\begin{equation*}
+\begin{split}
+\delta(x_1,x_0) =~& \frac{y_1}{x_1 - x_0} - \frac{y_0}{x_1 - x_0} = \frac{y_1}{x_1 - x_0} + \frac{y_0}{x_0 - x_1}\\
+\\
+\delta(x_2,x_1,x_0) =~& \frac{\delta(x_2, x_1)-\delta(x_1,x_0)}{x_2 - x_0}\\
+=~& \frac{1}{x_2-x_0}\left\{ \frac{y_2}{x_2-x_1}+\frac{y_1}{x_1-x_2}-\left(\frac{y_1}{x_1-x_0}+\frac{y_0}{x_0-x_1}\right)\right\}\\
+=~& \frac{1}{x_2-x_0}\left\{ \frac{y_2}{x_2-x_1}+y_1\left(\frac{1}{x_1-x_2}-\frac{1}{x_1-x_0}\right)-\frac{y_0}{x_0-x_1}\right\}\\
+=~& \frac{y_2}{(x_2-x_0)(x_2-x_1)} + \frac{y_1}{(x_1-x_0)(x_1-x_2)}+\\
+& \frac{y_0}{(x_0-x_1)(x_0-x_2)}\\
+\\
+\delta (x_3,x_2,x_1,x_0) =~& \frac{\delta (x_3,x_2,x_1)-\delta (x_2,x_1,x_0)}{x_3-x_0}\\
+=~& \frac{1}{x_3-x_0}\Bigg(\frac{y_3}{(x_3-x_1)(x_3-x_2)} + \frac{y_2}{(x_2-x_1)(x_2-x_3)} + \\
+& \frac{y_1}{(x_1-x_2)(x_1-x_3)} - \bigg( \frac{y_2}{(x_2-x_0)(x_2-x_1)} +  \\
+& \frac{y_1}{(x_1-x_0)(x_1-x_2)} + \frac{y_0}{(x_0-x_1)(x_0-x_2)} \bigg)\Bigg)\\
+=~& \frac{y_3}{(x_3-x_0)(x_3-x_1)(x_3-x_2)} + \frac{y_2}{(x_2-x_0)(x_2-x_1)(x_2-x_3)}\\
+&+ \frac{y_1}{(x_1-x_0)(x_1-x_2)(x_1-x_3)} \\
+&+ \frac{y_0}{(x_0-x_1)(x_0-x_2)(x_0-x_3)}
+\end{split}
+\end{equation*}
+
+Misalkan $x_2$ dan $x_3$ dipertukarkan, demikian pula $y_2$ dan $y_3$, maka kita dapatkan
+
+\begin{equation*}
+\begin{split}
+\delta(x_3,x_2,x_1,x_0) =~& \frac{y_2}{(x_2-x_0)(x_2-x_1)(x_2-x_3)} + \frac{y_3}{(x_3-x_0)(x_3-x_1)(x_3-x_2)}\\
+&+\frac{y_1}{(x_1-x_0)(x_1-x_2)(x_1-x_3)} \\
+&+ \frac{y_0}{(x_0-x_1)(x_0-x_2)(x_0-x_3)}\\
+=~& \delta(x_2,x_3,x_1,x_0)
+\end{split}
+\end{equation*}
+
+Jadi kita dapat mempertukarkan setiap $2$ nilai $x$ dan $2$ nilai $y$ yang bersangkutan, tanpa mengubah nilai beda terbagi yang bersangkutan. Sehingga secara umum berlaku
+
+\begin{gather*}
+\underbrace{\delta(x_n,x_{n-1},\ldots, x_2, x_1, x_0) = \ldots = \delta(x_0,x_1,x_2,\ldots,x_{n-1},x_n)} \\
+(n+1)! ~~\text{susunan}
+\end{gather*}
+
+Selanjutnya secara umum kita dapatkan
+
+\begin{equation}
+\boxed{
+\begin{split}
+\delta(x,x_0,x_1,x_2,\ldots,x_n) =~& \frac{y}{(x-x_0)(x-x_1)\ldots(x-x_n)} + \\
+&\frac{y_0}{(x_0-x)(x_0-x_1)\ldots(x_0-x_n)} +\\
+&\frac{y_1}{(x_1-x)(x_1-x_0)\ldots(x_1-x_n)}+\cdots+\\
+&\frac{y_n}{(x_n-x)(x_n-x_0)\ldots(x_n-x_{n-1})}
+\end{split}
+}
+\end{equation}
+
+\textbf{Bukti}
+
+Misal rumus itu benar s/d $x_{n-1}$, maka berlaku
+
+\begin{equation*}
+\begin{split}
+\delta(x,x_0,x_1,x_2,\ldots,x_{n-1}) =~& \frac{y}{(x-x_0)(x-x_1)\ldots(x-x_{n-1})} +\\
+& \frac{y_0}{(x_0-x)(x_0-x_1)\ldots(x_0-x_{n-1})} +\\
+& \frac{y_1}{(x_1-x)(x_1-x_0)\ldots(x_1-x_{n-1})} + \cdots +\\
+& \frac{y_{n-1}}{(x_{n-1}-x)(x_{n-1}-x_o)\ldots(x_{n-1}-x_{n-2})}
+\end{split}
+\end{equation*}
+
+Dengan demikian maka kita dapatkan
+
+\begin{equation*}
+\begin{split}
+\delta(x,x_0,x_1,x_2,\ldots,x_n) =~& \frac{\delta(x_0,x_1,x_2,\ldots,x_n)-\delta(x,x_0,x_1,\dots,x_{n-1})}{x_n - x}\\[1ex]
+=~& \frac{1}{x_n-x}  \Bigg( \frac{y_0}{(x_0-x_1)(x_0-x_2)\ldots(x_0-x_n)}+\\[1ex]
+& \frac{y_1}{(x_1-x_0)(x_1-x_2)\ldots(x_1-x_n)}+\cdots+\\[1ex]
+& \frac{y_n}{(x_n-x_0)(x_n-x_1)+\ldots(x_n-x_{n+1})}-\\[1ex]
+& \bigg(\frac{y}{(x-x_0)(x-x_1)\ldots(x-x_{n-1})}+\\[1ex]
+& \frac{y_0}{(x_0-x)(x_0-x_1)\ldots(x_0-x_{n-1})}+\\[1ex]
+& \frac{y_1}{(x_1-x)(x_1-x_0)\ldots(x_1-x_{n-1})}+\cdots+\\[1ex]
+& \frac{y_{n-1}}{(x_{n-1}-x)(x_{n-1}-x_0)\ldots(x_{n-1}-x_{n-2})}\bigg)\Bigg)\\[1ex]
+=~&\frac{1}{x_n-x} \Bigg( -\frac{y}{(x-x_0)(x-x_1)\ldots(x-x_{n-1})}+\\[1ex]
+& y_0\bigg(\frac{x_n-x}{(x_0-x)(x_0-x_1)\ldots(x-x_{n-1})}\bigg)+\\[1ex]
+& y_1\bigg(\frac{x_n-x}{(x_1-x)(x_1-x_0)\ldots(x_1-x_n)}\bigg)+\\[1ex]
+& \cdots + \frac{y_n}{(x_n-x_0)(x_n-x_1)\ldots(x_n-x_{n-1})}\Bigg)\\[1ex]
+=~& \frac{y}{(x-x_0)(x-x_1)\ldots(x-x_n)} +\\[1ex]
+& \frac{y_0}{(x_0-x)(x_0-x_1)\ldots(x_0-x_n)} + \\[1ex]
+=~& \frac{y_1}{(x_1-x)(x_1-x_0)\ldots(x_1-x_n)} + \cdots + \\[1ex]
+&\frac{y_n}{(x_n-x_0)(x_n-x_1)\ldots(x_n-x_{n-1})} ~~\text{(terbukti)}
+\end{split}
+\end{equation*}
+
+Hubungan antara beda terbagi dan beda sederhana dapat diperoleh dengan memulai dari sekumpulan nilai fungsi yang bersesuaian dengan nilai argumen yang berjarak sama. Kemudian berturut-turut dilanjutkan dengan membuat tabel sederhana dan tabel beda terbagi untuk nilai-nilai ini, lalu kedua tabel itu dibandingkan. Untuk tabel beda sederhana kita dapatkan,
+
+\begin{table*}[!htbp]
+\footnotesize 
+\begin{tabular}{@{}|c|c|c|c|c|c|@{}}
+\hline
+$x$  & $y$  & $\Delta y$ & $\Delta^2 y$ & $\Delta^3 y$ & $\Delta^4 y$\\\hline
+$x_0$ & $y_0$ & & & &\\
+& & $y_1 - y_0$ & & &\\
+$x_0 + h$ & $y_1$ & & $y_2 - 2y_1 + y_0$ & &\\
+& & $y_2 - y_1$ & & $y_3 - 3y_2 + 3y_1 - y_0$ & \\
+$x_0 + 2h$ & $y_2$ & & $y_3 - 2y_2 + y_1$ & & $y_4 - 4y_3 + 6y_2 - 4y_1 + y_0$ \\
+& & $y_3 - y_2$ & & $y_4 - 3y_3 + 3y_2 - y_1$ & \\
+$x_0 + 3h$ & $y_3$ & & $y_4 - 2y_3 + y_2$ & & $y_5 - 4y_4 + 6y_3 - 4y_2 + y_1$ \\
+& & $y_4 - y_3$ & & $y_5 - 3y_4 + 3y_3 - y_2$ & \\
+$x_0 + 4h$ & $y_4$ & & $y_5 - 2y_4 + y_3$ & & $y_6 - 4y_5 + 6y_4 - 4y_3 + y_2$ \\
+& & $y_5 - y_4$ & & $y_6 - 3y_5 + 3y_4 - y_3$ & \\
+$x_0 + 5h$ & $y_5$ & & $y_6 - 2y_5 + y_4$ & & \\
+& & $y_6 - y_5$ & & & \\
+$x_0 + 6h$ & $y_6$ & & & & \\\hline
+\end{tabular}
+\end{table*}
+
+Dan tabel beda terbaginya adalah
+
+\begin{table*}[!htbp]
+\large
+\begin{tabular}{@{}|c|c|c|c|c|c|@{}}
+\hline
+$x$  & $y$  & $\delta y$ & $\delta^2 y$ & $\delta^3 y$ & $\delta^4 y$\\\hline
+$x_0$ & $y_0$ & & & &\\
+& & $\frac{y_1 - y_0}{h}$ & & &\\
+$x_0 + h$ & $y_1$ & & $\frac{y_2 - 2y_1 + y_0}{2h\cdot h}$ & &\\
+& & $\frac{y_2 - y_1}{h}$ & & $\frac{y_3 - 3y_2 + 3y_1 - y_0}{3h\cdot2h\cdot h}$ & \\
+$x_0 + 2h$ & $y_2$ & & $\frac{y_3 - 2y_2 + y_1}{2h\cdot h}$ & & $\frac{y_4 - 4y_3 + 6y_2 - 4y_1 + y_0}{4h\cdot3h\cdot2h\cdot h}$ \\
+& & $\frac{y_3 - y_2}{h}$ & & $\frac{y_4 - 3y_3 + 3y_2 - y_1}{3h\cdot2h\cdot h}$ & \\
+$x_0 + 3h$ & $y_3$ & & $\frac{y_4 - 2y_3 + y_2}{2h\cdot h}$ & & $\frac{y_5 - 4y_4 + 6y_3 - 4y_2 + y_1}{4h\cdot3h\cdot2h\cdot h}$ \\
+& & $\frac{y_4 - y_3}{h}$ & & $\frac{y_5 - 3y_4 + 3y_3 - y_2}{3h\cdot2h\cdot h}$ & \\
+$x_0 + 4h$ & $y_4$ & & $\frac{y_5 - 2y_4 + y_3}{2h\cdot h}$ & & $\frac{y_6 - 4y_5 + 6y_4 - 4y_3 + y_2}{4h\cdot3h\cdot2h\cdot h}$ \\
+& & $\frac{y_5 - y_4}{h}$ & & $\frac{y_6 - 3y_5 + 3y_4 - y_3}{3h\cdot2h\cdot h}$ & \\
+$x_0 + 5h$ & $y_5$ & & $\frac{y_6 - 2y_5 + y_4}{2h\cdot h}$ & & \\
+& & $\frac{y_6 - y_5}{h}$ & & & \\
+$x_0 + 6h$ & $y_6$ & & & & \\\hline
+\end{tabular}
+\end{table*}
+
+
+
+
+Dari perbandingan kedua tabel di atas, terlihat bahwa beda terbagi ke-$m$ berkaitan dengan beda sederhana ke-$m$ melalui faktor $m!\,h^m$. Secara khusus, beda terbagi ke-$m$ pada $x_0$ adalah
+\begin{equation}
+\delta^m[x_0,\,x_1,\ldots,x_m] = \frac{\Delta^m y_0}{m!\,h^m}.
+\end{equation}
+Hubungan ini memperlihatkan bahwa untuk data berjarak sama, beda terbagi dapat dihitung langsung dari beda sederhana, sehingga rumus Newton untuk interpolasi maju maupun mundur merupakan kasus khusus dari rumus interpolasi Newton beda terbagi.
+
+\section*{Rangkuman}
+
+Pada bab ini telah dibahas metode \textbf{interpolasi polinomial} berdasarkan konsep \textbf{beda (differences)}. Beda pertama, kedua, dan seterusnya dari suatu tabel data dihitung secara bertahap membentuk tabel beda, baik diagonal maupun horizontal. Ketidakteraturan pada tabel beda dapat dimanfaatkan untuk mendeteksi dan mengoreksi kesalahan pada data tabel.
+
+Polinomial interpolasi dapat dibangun menggunakan \textbf{Rumus Newton untuk interpolasi maju} (cocok untuk interpolasi di dekat awal tabel) maupun \textbf{Rumus Newton untuk interpolasi mundur} (cocok di dekat akhir tabel). Ketelitian interpolasi bergantung pada orde beda yang digunakan dan jarak antar data $h$. Konsep \textbf{fungsi faktorial} menyederhanakan notasi dan derivasi rumus interpolasi, sementara \textbf{beda terbagi} menggeneralisasi metode Newton untuk data yang tidak berjarak sama.
+
+\section*{Latihan Soal}
+
+\begin{enumerate}
+  \item Diberikan tabel nilai $\sin x$ berikut:
+  \begin{center}
+  \begin{tabular}{|c|c|}
+  \hline
+  $x$ (derajat) & $\sin x$ \\ \hline
+  $0^\circ$ & $0{,}0000$ \\
+  $10^\circ$ & $0{,}1736$ \\
+  $20^\circ$ & $0{,}3420$ \\
+  $30^\circ$ & $0{,}5000$ \\
+  $40^\circ$ & $0{,}6428$ \\ \hline
+  \end{tabular}
+  \end{center}
+  Dengan rumus Newton untuk interpolasi maju, hitunglah $\sin 15^\circ$ dan bandingkan dengan nilai eksaknya!
+
+  \item Buatlah tabel beda hingga orde keempat dari data berikut dan periksa apakah ada kesalahan:
+  \begin{center}
+  \begin{tabular}{|c|c|}
+  \hline
+  $x$ & $y$ \\ \hline
+  $1$ & $1$ \\
+  $2$ & $8$ \\
+  $3$ & $27$ \\
+  $4$ & $64$ \\
+  $5$ & $125$ \\
+  $6$ & $216$ \\ \hline
+  \end{tabular}
+  \end{center}
+
+  \item Gunakan rumus Newton untuk interpolasi mundur untuk menghitung nilai $f(9{,}5)$ dari tabel berikut:
+  \begin{center}
+  \begin{tabular}{|c|c|}
+  \hline
+  $x$ & $f(x)$ \\ \hline
+  $7$ & $3{,}0000$ \\
+  $8$ & $3{,}1623$ \\
+  $9$ & $3{,}3166$ \\
+  $10$ & $3{,}4641$ \\ \hline
+  \end{tabular}
+  \end{center}
+
+  \item Dengan menggunakan beda terbagi, tentukan polinomial interpolasi Newton untuk titik-titik: $(1,\,1)$, $(2,\,4)$, $(4,\,16)$, $(5,\,25)$!
+\end{enumerate}
