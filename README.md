@@ -1,6 +1,7 @@
 # Dasar Matematika Rekayasa
 
-Buku ajar matematika rekayasa dasar dalam bahasa Indonesia.
+Buku ajar matematika rekayasa dasar dalam bahasa Indonesia.  
+Prerequisite: https://bagustris.github.io/matematika  
 
 **Penulis:** Bagus Tris Atmaja, Dwi Prananto, Mifta Nur Farid  
 **Institusi:** Institut Teknologi Sepuluh Nopember (ITS), Surabaya
