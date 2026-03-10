@@ -1,6 +1,6 @@
 MAIN = matrek
 
-.PHONY: all clean
+.PHONY: all clean $(MAIN).pdf
 
 all: $(MAIN).pdf
 
