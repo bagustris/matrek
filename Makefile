@@ -7,7 +7,7 @@ HASH_FILE = .sources.hash
 all:
 	@current=$$(cat $(SOURCES) | md5sum | cut -d' ' -f1); \
 	stored=$$(cat $(HASH_FILE) 2>/dev/null); \
-	if [ "$$current" != "$$stored" ]; then \
+	if [ ! -f $(MAIN).pdf ] || [ "$$current" != "$$stored" ]; then \
 		pdflatex $(MAIN); \
 		biber $(MAIN); \
 		pdflatex $(MAIN); \
@@ -18,4 +18,4 @@ all:
 	fi
 
 clean:
-	rm -f *.aux *.log *.toc *.lof *.lot *.out *.bbl *.bcf *.blg *.run.xml *.synctex.gz $(MAIN).pdf $(HASH_FILE)
+	rm -f *.aux *.log *.toc *.lof *.lot *.out *.bbl *.bcf *.blg *.run.xml *.synctex.gz $(HASH_FILE)
