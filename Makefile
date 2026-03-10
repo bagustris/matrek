@@ -1,6 +1,6 @@
 MAIN = matrek
 
-.PHONY: all clean $(MAIN).pdf
+.PHONY: all clean
 
 all: $(MAIN).pdf
 
@@ -11,4 +11,4 @@ $(MAIN).pdf: $(MAIN).tex preamble.tex pengantar.tex bab1.tex bab2.tex bab3.tex b
 	pdflatex $(MAIN)
 
 clean:
-	rm -f *.aux *.log *.toc *.lof *.lot *.out *.bbl *.bcf *.blg *.run.xml *.synctex.gz
+	rm -f *.aux *.log *.toc *.lof *.lot *.out *.bbl *.bcf *.blg *.run.xml *.synctex.gz $(MAIN).pdf
